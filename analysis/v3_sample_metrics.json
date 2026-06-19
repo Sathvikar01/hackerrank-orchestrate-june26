@@ -1,0 +1,516 @@
+{
+  "total_rows": 20,
+  "row_accuracy": 0.35,
+  "per_field_accuracy": {
+    "evidence_standard_met": 0.95,
+    "risk_flags": 0.55,
+    "issue_type": 0.55,
+    "object_part": 0.85,
+    "claim_status": 0.8,
+    "supporting_image_ids": 0.85,
+    "valid_image": 0.95,
+    "severity": 0.55
+  },
+  "per_field_correct": {
+    "evidence_standard_met": 19,
+    "risk_flags": 11,
+    "issue_type": 11,
+    "object_part": 17,
+    "claim_status": 16,
+    "supporting_image_ids": 17,
+    "valid_image": 19,
+    "severity": 11
+  },
+  "per_field_total": {
+    "evidence_standard_met": 20,
+    "risk_flags": 20,
+    "issue_type": 20,
+    "object_part": 20,
+    "claim_status": 20,
+    "supporting_image_ids": 20,
+    "valid_image": 20,
+    "severity": 20
+  },
+  "row_errors": [
+    {
+      "index": 0,
+      "user_id": "user_001",
+      "claim_object": "car",
+      "differences": {
+        "issue_type": {
+          "predicted": "missing_part",
+          "ground_truth": "dent"
+        },
+        "severity": {
+          "predicted": "high",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 2,
+      "user_id": "user_004",
+      "claim_object": "car",
+      "differences": {
+        "issue_type": {
+          "predicted": "glass_shatter",
+          "ground_truth": "crack"
+        },
+        "severity": {
+          "predicted": "high",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 4,
+      "user_id": "user_005",
+      "claim_object": "car",
+      "differences": {
+        "risk_flags": {
+          "predicted": "manual_review_required|user_history_risk",
+          "ground_truth": "claim_mismatch|user_history_risk|manual_review_required"
+        },
+        "issue_type": {
+          "predicted": "dent",
+          "ground_truth": "scratch"
+        },
+        "claim_status": {
+          "predicted": "supported",
+          "ground_truth": "contradicted"
+        },
+        "severity": {
+          "predicted": "medium",
+          "ground_truth": "low"
+        }
+      }
+    },
+    {
+      "index": 5,
+      "user_id": "user_006",
+      "claim_object": "car",
+      "differences": {
+        "risk_flags": {
+          "predicted": "damage_not_visible|manual_review_required",
+          "ground_truth": "wrong_angle|damage_not_visible"
+        }
+      }
+    },
+    {
+      "index": 7,
+      "user_id": "user_008",
+      "claim_object": "car",
+      "differences": {
+        "risk_flags": {
+          "predicted": "cropped_or_obstructed|manual_review_required|non_original_image|user_history_risk",
+          "ground_truth": "claim_mismatch|non_original_image|user_history_risk|manual_review_required"
+        },
+        "issue_type": {
+          "predicted": "scratch",
+          "ground_truth": "broken_part"
+        },
+        "object_part": {
+          "predicted": "hood",
+          "ground_truth": "front_bumper"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_1"
+        },
+        "severity": {
+          "predicted": "low",
+          "ground_truth": "high"
+        }
+      }
+    },
+    {
+      "index": 8,
+      "user_id": "user_009",
+      "claim_object": "laptop",
+      "differences": {
+        "issue_type": {
+          "predicted": "glass_shatter",
+          "ground_truth": "crack"
+        },
+        "severity": {
+          "predicted": "high",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 10,
+      "user_id": "user_011",
+      "claim_object": "laptop",
+      "differences": {
+        "issue_type": {
+          "predicted": "water_damage",
+          "ground_truth": "stain"
+        }
+      }
+    },
+    {
+      "index": 12,
+      "user_id": "user_018",
+      "claim_object": "laptop",
+      "differences": {
+        "risk_flags": {
+          "predicted": "cropped_or_obstructed",
+          "ground_truth": "none"
+        },
+        "issue_type": {
+          "predicted": "glass_shatter",
+          "ground_truth": "crack"
+        },
+        "severity": {
+          "predicted": "high",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 13,
+      "user_id": "user_020",
+      "claim_object": "laptop",
+      "differences": {
+        "risk_flags": {
+          "predicted": "manual_review_required|user_history_risk",
+          "ground_truth": "damage_not_visible|user_history_risk|manual_review_required"
+        },
+        "issue_type": {
+          "predicted": "dent",
+          "ground_truth": "none"
+        },
+        "claim_status": {
+          "predicted": "supported",
+          "ground_truth": "contradicted"
+        },
+        "severity": {
+          "predicted": "low",
+          "ground_truth": "none"
+        }
+      }
+    },
+    {
+      "index": 16,
+      "user_id": "user_031",
+      "claim_object": "package",
+      "differences": {
+        "risk_flags": {
+          "predicted": "manual_review_required|user_history_risk",
+          "ground_truth": "user_history_risk|manual_review_required"
+        },
+        "object_part": {
+          "predicted": "box",
+          "ground_truth": "package_side"
+        }
+      }
+    },
+    {
+      "index": 17,
+      "user_id": "user_032",
+      "claim_object": "package",
+      "differences": {
+        "risk_flags": {
+          "predicted": "damage_not_visible|manual_review_required",
+          "ground_truth": "cropped_or_obstructed|damage_not_visible|manual_review_required"
+        },
+        "valid_image": {
+          "predicted": "true",
+          "ground_truth": "false"
+        }
+      }
+    },
+    {
+      "index": 18,
+      "user_id": "user_033",
+      "claim_object": "package",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "false",
+          "ground_truth": "true"
+        },
+        "risk_flags": {
+          "predicted": "damage_not_visible|manual_review_required|user_history_risk",
+          "ground_truth": "wrong_object|claim_mismatch|user_history_risk|manual_review_required"
+        },
+        "object_part": {
+          "predicted": "box",
+          "ground_truth": "unknown"
+        },
+        "claim_status": {
+          "predicted": "not_enough_information",
+          "ground_truth": "contradicted"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_1"
+        },
+        "severity": {
+          "predicted": "unknown",
+          "ground_truth": "low"
+        }
+      }
+    },
+    {
+      "index": 19,
+      "user_id": "user_034",
+      "claim_object": "package",
+      "differences": {
+        "risk_flags": {
+          "predicted": "manual_review_required|text_instruction_present|user_history_risk",
+          "ground_truth": "damage_not_visible|text_instruction_present|user_history_risk|manual_review_required"
+        },
+        "issue_type": {
+          "predicted": "torn_packaging",
+          "ground_truth": "none"
+        },
+        "claim_status": {
+          "predicted": "supported",
+          "ground_truth": "contradicted"
+        },
+        "supporting_image_ids": {
+          "predicted": "img_1",
+          "ground_truth": "img_1|img_2"
+        },
+        "severity": {
+          "predicted": "medium",
+          "ground_truth": "none"
+        }
+      }
+    }
+  ],
+  "prompt_version": "v3",
+  "model": "mimo-v2.5",
+  "wall_time_seconds": 334.0652062892914,
+  "cache_hits": 0,
+  "api_calls": 20,
+  "per_row_metadata": [
+    {
+      "user_id": "user_001",
+      "image_paths_declared": 1,
+      "image_paths_readable": 1,
+      "cache_hit": false,
+      "latency": 19.905296802520752,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image clearly shows the rear bumper area with significant damage, allowing evaluation of the claim.\",\n  \"issue_type\": \"missing_part\",\n  \"object_part\": \"rear_bumper\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The image displays the rear of the car with the rear bumper missing and visible deformation on the trunk, confirming damage to the claimed rear bumper area.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"high\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\"issue_type\": \"missing_part\", \"object_part\": \"rear_bumper\", \"severity\": \"high\", \"image_id\": \"img_1\"},\n    {\"issue_type\": \"dent\", \"object_part\": \"body\", \"severity\": \"medium\", \"image_id\": \"img_1\"}\n  ]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_002",
+      "image_paths_declared": 2,
+      "image_paths_readable": 2,
+      "cache_hit": false,
+      "latency": 28.278051376342773,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image 1 clearly shows the front bumper with visible damage, allowing evaluation of the claim.\",\n  \"issue_type\": \"dent\",\n  \"object_part\": \"front_bumper\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The front bumper is visible in image 1 with a dent and scratches, which matches the claimed part and damage reported by the customer.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"dent\",\n      \"object_part\": \"front_bumper\",\n      \"severity\": \"medium\",\n      \"image_id\": \"img_1\"\n    },\n    {\n      \"issue_type\": \"scratch\",\n      \"object_part\": \"front_bumper\",\n      \"severity\": \"low\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_004",
+      "image_paths_declared": 2,
+      "image_paths_readable": 2,
+      "cache_hit": false,
+      "latency": 13.47509479522705,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image 1 clearly shows the windshield with visible damage, allowing evaluation of the claim.\",\n  \"issue_type\": \"glass_shatter\",\n  \"object_part\": \"windshield\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The windshield is visible in img_1, displaying a shattered pattern with multiple radiating fractures, which confirms the claimed damage from an impact.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"high\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"glass_shatter\",\n      \"object_part\": \"windshield\",\n      \"severity\": \"high\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_007",
+      "image_paths_declared": 1,
+      "image_paths_readable": 1,
+      "cache_hit": false,
+      "latency": 14.003042221069336,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Claimed side mirror is visible with damage in the image.\",\n  \"issue_type\": \"broken_part\",\n  \"object_part\": \"side_mirror\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"Image img_1 shows a cracked side mirror with visible damage, matching the customer's claim.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [{\"issue_type\": \"broken_part\", \"object_part\": \"side_mirror\", \"severity\": \"medium\", \"image_id\": \"img_1\"}]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_005",
+      "image_paths_declared": 2,
+      "image_paths_readable": 2,
+      "cache_hit": false,
+      "latency": 12.480508804321289,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Rear bumper is clearly visible with dent in img_1\",\n  \"issue_type\": \"dent\",\n  \"object_part\": \"rear_bumper\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"Visible dent on rear bumper in img_1 matches claimed damage from rear tap\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"dent\",\n      \"object_part\": \"rear_bumper\",\n      \"severity\": \"medium\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_006",
+      "image_paths_declared": 1,
+      "image_paths_readable": 1,
+      "cache_hit": false,
+      "latency": 11.047162055969238,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": false,\n  \"evidence_standard_met_reason\": \"The claimed headlight is not visible in the submitted image; the part is out of frame or not shown.\",\n  \"issue_type\": \"unknown\",\n  \"object_part\": \"headlight\",\n  \"claim_status\": \"not_enough_information\",\n  \"claim_status_justification\": \"The submitted image does not show the headlight; the relevant part cannot be seen to evaluate the claimed crack.\",\n  \"supporting_image_ids\": \"none\",\n  \"valid_image\": true,\n  \"severity\": \"unknown\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": []\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_003",
+      "image_paths_declared": 2,
+      "image_paths_readable": 2,
+      "cache_hit": false,
+      "latency": 10.902441024780273,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image img_2 clearly shows the door panel with visible dent damage, matching the claim.\",\n  \"issue_type\": \"dent\",\n  \"object_part\": \"door\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The images, particularly img_2, show a dent on the door panel, which aligns with the customer's description of a dent along the side on the door panel area.\",\n  \"supporting_image_ids\": \"img_2\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"dent\",\n      \"object_part\": \"door\",\n      \"severity\": \"medium\",\n      \"image_id\": \"img_2\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": [
+        "blurry_image"
+      ]
+    },
+    {
+      "user_id": "user_008",
+      "image_paths_declared": 1,
+      "image_paths_readable": 1,
+      "cache_hit": false,
+      "latency": 31.61400008201599,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"The hood is visible with damage, allowing assessment of the claimed condition.\",\n  \"issue_type\": \"dent\",\n  \"object_part\": \"hood\",\n  \"claim_status\": \"contradicted\",\n  \"claim_status_justification\": \"The claimed scratch is not visible on the hood; instead, a severe dent (deformation) is observed in the image, contradicting the customer's description of a surface scratch.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": true,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"dent\",\n      \"object_part\": \"hood\",\n      \"severity\": \"medium\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": [
+        "cropped_or_obstructed"
+      ]
+    },
+    {
+      "user_id": "user_009",
+      "image_paths_declared": 1,
+      "image_paths_readable": 1,
+      "cache_hit": false,
+      "latency": 15.102063179016113,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image clearly shows the laptop screen with visible damage.\",\n  \"issue_type\": \"glass_shatter\",\n  \"object_part\": \"screen\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The image displays a laptop screen with a spider-web pattern of radiating cracks, indicating glass shatter, which matches the claimed part and damage.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"high\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"glass_shatter\",\n      \"object_part\": \"screen\",\n      \"severity\": \"high\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_010",
+      "image_paths_declared": 2,
+      "image_paths_readable": 2,
+      "cache_hit": false,
+      "latency": 11.819109678268433,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image 1 clearly shows the broken hinge area with visible damage, allowing evaluation of the claimed hinge issue.\",\n  \"issue_type\": \"broken_part\",\n  \"object_part\": \"hinge\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The broken hinge is clearly visible in image 1, showing mechanical failure consistent with the customer's claim of hinge damage after a drop.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"broken_part\",\n      \"object_part\": \"hinge\",\n      \"severity\": \"medium\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_011",
+      "image_paths_declared": 1,
+      "image_paths_readable": 1,
+      "cache_hit": false,
+      "latency": 15.443127632141113,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image clearly shows the laptop keyboard with visible water damage, allowing evaluation of the claim.\",\n  \"issue_type\": \"water_damage\",\n  \"object_part\": \"keyboard\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The submitted image (img_1) displays water droplets and wet stains on the keyboard area, directly matching the customer's report of a water spill affecting the keys.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"water_damage\",\n      \"object_part\": \"keyboard\",\n      \"severity\": \"medium\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_012",
+      "image_paths_declared": 2,
+      "image_paths_readable": 2,
+      "cache_hit": false,
+      "latency": 8.556737661361694,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Second image clearly shows the claimed corner dent\",\n  \"issue_type\": \"dent\",\n  \"object_part\": \"corner\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"Image 2 shows a visible dent on the corner of the laptop, matching the customer's description of damage\",\n  \"supporting_image_ids\": \"img_2\",\n  \"valid_image\": true,\n  \"severity\": \"low\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"dent\",\n      \"object_part\": \"corner\",\n      \"severity\": \"low\",\n      \"image_id\": \"img_2\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_018",
+      "image_paths_declared": 1,
+      "image_paths_readable": 1,
+      "cache_hit": false,
+      "latency": 8.955214262008667,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image clearly shows the laptop screen with spider-web fractures, enabling evaluation of claimed damage.\",\n  \"issue_type\": \"glass_shatter\",\n  \"object_part\": \"screen\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The submitted image displays the laptop screen with visible spider-web fractures, which matches the customer's description of a shattered screen.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"high\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [{\"issue_type\": \"glass_shatter\", \"object_part\": \"screen\", \"severity\": \"high\", \"image_id\": \"img_1\"}]\n}",
+      "deterministic_quality_flags": [
+        "cropped_or_obstructed"
+      ]
+    },
+    {
+      "user_id": "user_020",
+      "image_paths_declared": 1,
+      "image_paths_readable": 1,
+      "cache_hit": false,
+      "latency": 11.749792575836182,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Trackpad is clearly visible with identifiable damage in the submitted image.\",\n  \"issue_type\": \"dent\",\n  \"object_part\": \"trackpad\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"Image img_1 shows a visible dent on the trackpad surface, which matches the claimed physical damage from impact.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"low\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"dent\",\n      \"object_part\": \"trackpad\",\n      \"severity\": \"low\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_015",
+      "image_paths_declared": 1,
+      "image_paths_readable": 1,
+      "cache_hit": false,
+      "latency": 14.52432894706726,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image clearly shows the claimed package corner with visible crush damage, allowing evaluation.\",\n  \"issue_type\": \"crushed_packaging\",\n  \"object_part\": \"package_corner\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"Image img_1 displays a crushed corner on the package, consistent with the customer's claim of corner damage.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [{\"issue_type\": \"crushed_packaging\", \"object_part\": \"package_corner\", \"severity\": \"medium\", \"image_id\": \"img_1\"}]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_030",
+      "image_paths_declared": 2,
+      "image_paths_readable": 2,
+      "cache_hit": false,
+      "latency": 18.349830865859985,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image 1 clearly shows the claimed torn packaging on the seal side, providing sufficient visual evidence to evaluate the claim.\",\n  \"issue_type\": \"torn_packaging\",\n  \"object_part\": \"seal\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The images, particularly img_1, confirm visible torn tape and packaging on the seal side, matching the customer's description of torn packaging as if opened.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"torn_packaging\",\n      \"object_part\": \"seal\",\n      \"severity\": \"medium\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_031",
+      "image_paths_declared": 1,
+      "image_paths_readable": 1,
+      "cache_hit": false,
+      "latency": 28.754485607147217,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image clearly shows package exterior with visible water stains and damage, sufficient to evaluate the claim.\",\n  \"issue_type\": \"water_damage\",\n  \"object_part\": \"box\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The image displays prominent wet-looking stains on the package surface, directly matching the claimed water damage described in the transcript.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"water_damage\",\n      \"object_part\": \"box\",\n      \"severity\": \"medium\",\n      \"image_id\": \"img_1\"\n    },\n    {\n      \"issue_type\": \"crushed_packaging\",\n      \"object_part\": \"box\",\n      \"severity\": \"medium\",\n      \"image_id\": \"img_1\"\n    },\n    {\n      \"issue_type\": \"torn_packaging\",\n      \"object_part\": \"box\",\n      \"severity\": \"medium\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_032",
+      "image_paths_declared": 2,
+      "image_paths_readable": 2,
+      "cache_hit": false,
+      "latency": 24.820927143096924,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"img_1 clearly shows the opened package interior with packing material, allowing assessment of missing contents.\",\n  \"issue_type\": \"missing_part\",\n  \"object_part\": \"contents\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The image img_1 shows the package interior filled with packing material but no item visible, supporting the claim that contents are missing.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"high\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"missing_part\",\n      \"object_part\": \"contents\",\n      \"severity\": \"high\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_033",
+      "image_paths_declared": 1,
+      "image_paths_readable": 1,
+      "cache_hit": false,
+      "latency": 19.199918270111084,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": false,\n  \"evidence_standard_met_reason\": \"The outside box, which is the claimed part, is not clearly visible in the image; it is out of focus and partially cropped, preventing assessment of crushing damage.\",\n  \"issue_type\": \"unknown\",\n  \"object_part\": \"box\",\n  \"claim_status\": \"not_enough_information\",\n  \"claim_status_justification\": \"Image focuses on the can inside the package; the box itself is blurred and not sufficiently visible to evaluate the reported crushing.\",\n  \"supporting_image_ids\": \"none\",\n  \"valid_image\": true,\n  \"severity\": \"unknown\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": []\n}",
+      "deterministic_quality_flags": []
+    },
+    {
+      "user_id": "user_034",
+      "image_paths_declared": 2,
+      "image_paths_readable": 2,
+      "cache_hit": false,
+      "latency": 13.819387912750244,
+      "model": "mimo-v2.5",
+      "prompt_version": "v3",
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"img_1 clearly shows the torn seal on the package, providing sufficient visual evidence to evaluate the claim.\",\n  \"issue_type\": \"torn_packaging\",\n  \"object_part\": \"seal\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"Image img_1 displays the seal area with visible tearing, which directly matches the customer's claim of a torn-open package.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"wrong_object_part\": false,\n  \"text_instruction_present\": true,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"torn_packaging\",\n      \"object_part\": \"seal\",\n      \"severity\": \"medium\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "deterministic_quality_flags": []
+    }
+  ]
+}
