@@ -154,8 +154,39 @@ Before submitting, confirm:
 
 ---
 
-## Judge interview
+## Built solution
 
-After submission, the AI Judge may ask about your approach, implementation decisions, model usage, evaluation strategy, and how you used AI while building the solution.
+This repo now contains a complete multi-modal evidence-review system. See [`SOLUTION.md`](./SOLUTION.md) for the full status, accuracy, experiments, and reproduction steps.
 
-Be prepared to explain your solution in detail.
+### Quick recap
+
+- `output.csv` — 44 predictions for `dataset/claims.csv` (schema-validated).
+- `code/` — runnable pipeline; `python code/main.py --input dataset/claims.csv --output output.csv`.
+- `code/evaluation/main.py` — per-field accuracy on the 20-row sample set.
+- `evaluation/evaluation_report.md` — operational analysis (cost, latency, rate limits, caching).
+- `reports/`, `architecture/`, `submission/` — design + audit docs.
+- `code.zip` — submission bundle.
+
+### Architecture (one line)
+
+`mimo-v2.5` (MIMO API, multimodal) → JSON output → OpenCV image-quality union → deterministic rule engine (enum normalization, most-severe visible issue, cross-field consistency) → `output.csv`. Disk cache keyed on image hash + prompt + model for reproducible re-runs.
+
+### Sample-set accuracy (20 labeled rows)
+
+| Field | Accuracy |
+|---|---|
+| evidence_standard_met | 85% |
+| claim_status | 85% |
+| valid_image | 90% |
+| object_part | 90% |
+| supporting_image_ids | 70% |
+| risk_flags | 55% |
+| severity | 45% |
+| issue_type | 40% |
+| **Row accuracy (all enum fields match)** | **20%** |
+
+### Branch strategy
+
+- `feature/baseline-pipeline` — active development branch.
+- `submission/v1` — the submission branch.
+- `v1-submission` — tag pointing at the merged commit.
