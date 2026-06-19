@@ -449,14 +449,28 @@ def apply_rules_v2(
             if not _contains_any(vlm_blurb, _SHATTER_HINTS):
                 issue_type = "crack"
 
+        # Second glass_shatter gate: even WITH a concrete visible_issue, if
+        # the VLM's blurb describes a single fracture (crack/hairline/single
+        # line) and does NOT contain any shatter language, the call is a
+        # crack, not a shatter. This catches the common VLM error of
+        # labeling a single stone-hit fracture as glass_shatter.
+        if issue_type == "glass_shatter":
+            single_fracture_hints = (
+                "crack", "cracked", "hairline", "single fracture",
+                "single crack", "one crack", "linear crack", "line crack",
+                "stone hit", "stone impact", "small crack", "minor crack",
+            )
+            if (_contains_any(vlm_blurb, single_fracture_hints)
+                    and not _contains_any(vlm_blurb, _SHATTER_HINTS)):
+                issue_type = "crack"
+
         # Surface mark no deformation -> scratch (NOT dent)
         if issue_type == "dent" and _contains_any(vlm_blurb, _NO_DEFORM_HINTS):
             issue_type = "scratch"
 
         # Residue / stain (no real water pattern) -> stain (NOT water_damage)
         if issue_type == "water_damage" and _contains_any(vlm_blurb, _RESIDUE_HINTS):
-            if not _contains_any(vlm_blurb, _WET_HINTS):
-                issue_type = "stain"
+            issue_type = "stain"
 
     # ------------------------------------------------------------------
     # Normalize the (possibly updated) issue_type / object_part again.
@@ -569,6 +583,17 @@ def apply_rules_v2(
                 f = f.strip()
                 if f and f.lower() != "none":
                     flag_set.add(f)
+
+        # For NEI cases where the VLM's blurb says the part is not visible /
+        # wrong angle, the right risk flag is wrong_angle, NOT claim_mismatch.
+        # claim_mismatch implies the image shows something different from
+        # what was claimed; wrong_angle implies the image doesn't show the
+        # claimed part at all.
+        if claim_status == "not_enough_information":
+            if _contains_any(vlm_blurb, _NOT_VISIBLE_PHRASES):
+                if "wrong_angle" not in flag_set:
+                    flag_set.add("wrong_angle")
+                flag_set.discard("claim_mismatch")
 
         # manual_review_required: when any high-risk signal co-occurs.
         high_risk_signals = {
