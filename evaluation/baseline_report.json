@@ -1,0 +1,462 @@
+{
+  "rows_processed": 20,
+  "images_processed": 29,
+  "output_csv": "C:\\Users\\arsat\\OneDrive\\Desktop\\hackerrank2\\hackerrank-orchestrate-june26\\output_sample_baseline.csv",
+  "total_time_seconds": 313.0357701778412,
+  "total_tokens": 70891,
+  "cache_hits": 20,
+  "metadata": [
+    {
+      "raw_content": "",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 1378,
+        "total_tokens": 3426,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 2047,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 1344,
+          "image_tokens": 228
+        }
+      },
+      "latency": 20.536237955093384,
+      "cache_hit": true,
+      "parse_error": true
+    },
+    {
+      "raw_content": "",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 1364,
+        "total_tokens": 3412,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 2047,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 214
+        }
+      },
+      "latency": 18.221291303634644,
+      "cache_hit": true,
+      "parse_error": true
+    },
+    {
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image 1 clearly shows a cracked windshield, providing sufficient evidence to evaluate the claim.\",\n  \"issue_type\": \"crack\",\n  \"object_part\": \"windshield\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"Image 1 displays a distinct crack pattern on the windshield, consistent with the customer's description of damage from a stone hit.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"high\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"crack\",\n      \"object_part\": \"windshield\",\n      \"severity\": \"high\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 1302,
+        "prompt_tokens": 2271,
+        "total_tokens": 3573,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 1082,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 1136
+        }
+      },
+      "latency": 11.310739994049072,
+      "cache_hit": true
+    },
+    {
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image clearly shows cracked side mirror glass, allowing evaluation of the claimed damage.\",\n  \"issue_type\": \"crack\",\n  \"object_part\": \"side_mirror\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"Image img_1 displays visible cracks in the side mirror glass, matching the customer's description of damage to the side mirror.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\"issue_type\": \"crack\", \"object_part\": \"side_mirror\", \"severity\": \"medium\", \"image_id\": \"img_1\"}\n  ]\n}",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 1726,
+        "prompt_tokens": 1172,
+        "total_tokens": 2898,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 1515,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 44
+        }
+      },
+      "latency": 12.148601293563843,
+      "cache_hit": true
+    },
+    {
+      "raw_content": "",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 1383,
+        "total_tokens": 3431,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 2047,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 240
+        }
+      },
+      "latency": 17.64218282699585,
+      "cache_hit": true,
+      "parse_error": true
+    },
+    {
+      "raw_content": "{\n  \"evidence_standard_met\": false,\n  \"evidence_standard_met_reason\": \"The image does not provide a clear view of the headlight, which is the claimed part, making it impossible to assess the reported crack.\",\n  \"issue_type\": \"none\",\n  \"object_part\": \"unknown\",\n  \"claim_status\": \"not_enough_information\",\n  \"claim_status_justification\": \"The submitted image does not show the headlight area; therefore, the claimed crack cannot be evaluated from the visual evidence.\",\n  \"supporting_image_ids\": \"none\",\n  \"valid_image\": true,\n  \"severity\": \"none\",\n  \"image_quality_flags\": [\"wrong_angle\", \"damage_not_visible\"],\n  \"claim_mismatch\":",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 1464,
+        "total_tokens": 3512,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 1894,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 228
+        }
+      },
+      "latency": 16.36458444595337,
+      "cache_hit": true,
+      "parse_error": true
+    },
+    {
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image 2 clearly shows a dent on the car door panel, providing sufficient visual evidence to evaluate the claim.\",\n  \"issue_type\": \"dent\",\n  \"object_part\": \"door\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"Image 2 displays a visible dent on the car door, which matches the claimed dent on the door panel area.\",\n  \"supporting_image_ids\": \"img_2\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [\"blurry_image\"],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\"issue_type\": \"dent\", \"object_part\": \"door\", \"severity\": \"medium\", \"image_id\": \"img_2\"}\n  ]\n}",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 1311,
+        "prompt_tokens": 2371,
+        "total_tokens": 3682,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 1095,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 1237
+        }
+      },
+      "latency": 11.981792688369751,
+      "cache_hit": true
+    },
+    {
+      "raw_content": "",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 1810,
+        "total_tokens": 3858,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 2047,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 672
+        }
+      },
+      "latency": 18.267691135406494,
+      "cache_hit": true,
+      "parse_error": true
+    },
+    {
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image clearly shows the laptop screen with extensive cracks and shattering, providing sufficient visual evidence to evaluate the claim.\",\n  \"issue_type\": \"glass_shatter\",\n  \"object_part\": \"screen\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"Image img_1 displays a laptop with a severely cracked and shattered screen, which directly matches the claimed display glass crack.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"high\",\n  \"image_quality_flags\":",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 1628,
+        "total_tokens": 3676,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 1914,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 532
+        }
+      },
+      "latency": 15.367007493972778,
+      "cache_hit": true,
+      "parse_error": true
+    },
+    {
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"img_1 provides a clear close-up of the damaged hinge, which is the claimed part and condition.\",\n  \"issue_type\": \"broken_part\",\n  \"object_part\": \"hinge\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"img_1 clearly shows a broken hinge with visible damage, matching the claim of hinge area broken after a drop.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"high\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\"issue_type\": \"broken_part\", \"object_part\": \"hinge\", \"severity\": \"high\", \"image_id\": \"img_1\"}\n  ]\n}",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 1908,
+        "prompt_tokens": 1447,
+        "total_tokens": 3355,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 1693,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 348
+        }
+      },
+      "latency": 14.67947506904602,
+      "cache_hit": true
+    },
+    {
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image clearly shows water droplets on the laptop keyboard, relevant to the claimed water spill.\",\n  \"issue_type\": \"water_damage\",\n  \"",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 1379,
+        "total_tokens": 3427,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 1998,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 288
+        }
+      },
+      "latency": 16.15025281906128,
+      "cache_hit": true,
+      "parse_error": true
+    },
+    {
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image 2 provides a close-up view of the laptop corner with a visible dent",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 2536,
+        "total_tokens": 4584,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 2011,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 1440
+        }
+      },
+      "latency": 16.554084539413452,
+      "cache_hit": true,
+      "parse_error": true
+    },
+    {
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image clearly shows the laptop screen with visible cracks and shattering, allowing evaluation of the claimed damage.\",\n  \"issue_type\": \"glass_shatter\",\n  \"object_part\": \"screen\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The image displays a MacBook Pro screen with multiple cracks and a shattered pattern, directly confirming the customer's description of screen damage.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"high\",\n  \"image_quality_flags\": [\"none\"],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\"issue_type\": \"glass_shatter\", \"object_part\": \"screen\", \"severity\": \"high\", \"image_id\": \"img_1\"}\n  ]\n}",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 1281,
+        "prompt_tokens": 1877,
+        "total_tokens": 3158,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 1063,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 672
+        }
+      },
+      "latency": 10.175153255462646,
+      "cache_hit": true
+    },
+    {
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Trackpad is clearly visible with a noticeable scratch.\",\n  \"issue_type\": \"scratch\",\n  \"object_part\": \"trackpad\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"Image img_1 shows a scratch on the laptop trackpad, consistent with the claimed physical damage.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"low\",\n  \"image_quality_flags\": [],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\"issue_type\": \"scratch\", \"object_part\": \"trackpad\", \"severity\": \"low\", \"image_id\": \"img_1\"}\n  ]\n}",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 1570,
+        "prompt_tokens": 1644,
+        "total_tokens": 3214,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 1371,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 540
+        }
+      },
+      "latency": 11.840248584747314,
+      "cache_hit": true
+    },
+    {
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"The image clearly displays the package corner with visible crushing damage, allowing for evaluation of the claimed issue.\",\n  \"issue_type\": \"crushed_packaging\",\n  \"object_part\": \"package_corner\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"The image shows a crushed corner on the package, directly matching the customer's report of a corner being damaged upon receipt.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"medium\",\n  \"image_quality_flags\": [\"none\"],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\"issue_type\": \"crushed_packaging\", \"object_part\": \"package_corner\", \"severity\": \"medium\", \"image_id\": \"img_1\"}\n  ]\n}",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 1481,
+        "prompt_tokens": 1638,
+        "total_tokens": 3119,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 1260,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 540
+        }
+      },
+      "latency": 12.025987386703491,
+      "cache_hit": true
+    },
+    {
+      "raw_content": "",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 1535,
+        "total_tokens": 3583,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 2047,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 407
+        }
+      },
+      "latency": 15.730984210968018,
+      "cache_hit": true,
+      "parse_error": true
+    },
+    {
+      "raw_content": "",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 1947,
+        "total_tokens": 3995,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 2047,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 837
+        }
+      },
+      "latency": 16.31994128227234,
+      "cache_hit": true,
+      "parse_error": true
+    },
+    {
+      "raw_content": "{\n  \"evidence_standard_met\": true,\n  \"evidence_standard_met_reason\": \"Image 1 provides a clear view of the open package's contents area, showing only packing material with no visible item, which is sufficient to evaluate the claim.\",\n  \"issue_type\": \"missing_part\",\n  \"object_part\": \"contents\",\n  \"claim_status\": \"supported\",\n  \"claim_status_justification\": \"Image 1 clearly displays the inside of the package filled with crumpled packing material and no item visible, directly supporting the claim that contents are missing.\",\n  \"supporting_image_ids\": \"img_1\",\n  \"valid_image\": true,\n  \"severity\": \"high\",\n  \"image_quality_flags\": [\"none\"],\n  \"claim_mismatch\": false,\n  \"wrong_object\": false,\n  \"text_instruction_present\": false,\n  \"possible_manipulation\": false,\n  \"non_original_image\": false,\n  \"visible_issues\": [\n    {\n      \"issue_type\": \"missing_part\",\n      \"object_part\": \"contents\",\n      \"severity\": \"high\",\n      \"image_id\": \"img_1\"\n    }\n  ]\n}",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 1826,
+        "prompt_tokens": 1826,
+        "total_tokens": 3652,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 1585,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 715
+        }
+      },
+      "latency": 17.294774532318115,
+      "cache_hit": true
+    },
+    {
+      "raw_content": "",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 1304,
+        "total_tokens": 3352,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 2046,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 198
+        }
+      },
+      "latency": 19.075820922851562,
+      "cache_hit": true,
+      "parse_error": true
+    },
+    {
+      "raw_content": "",
+      "model": "mimo-v2.5",
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 1936,
+        "total_tokens": 3984,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": null,
+          "audio_tokens": null,
+          "reasoning_tokens": 2047,
+          "rejected_prediction_tokens": null
+        },
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": null,
+          "image_tokens": 824
+        }
+      },
+      "latency": 16.531234979629517,
+      "cache_hit": true,
+      "parse_error": true
+    }
+  ]
+}
