@@ -97,7 +97,14 @@ _NOT_VISIBLE_PHRASES = (
     "cannot see", "can't see", "can not see",
     "no clear view", "no view of", "not shown", "cropped", "cropped out",
     "wrong angle", "angle does not show", "no image of",
-    "relevant part is not visible",
+    "relevant part is not visible", "no item visible", "not in the picture",
+    "outside the frame", "absent from the image", "absent from view",
+    "not captured", "not provided", "missing from view",
+    "cannot evaluate", "can not evaluate", "unable to evaluate",
+    "impossible to evaluate", "cannot be evaluated", "can not be evaluated",
+    "not in focus", "is blurry", "blurry and out", "too dark", "too bright",
+    "do not show", "does not show", "shows a different", "shows another",
+    "not the claimed", "different from the claimed",
 )
 
 _NO_DAMAGE_PHRASES = (
@@ -105,6 +112,10 @@ _NO_DAMAGE_PHRASES = (
     "no scratch", "no dent", "no crack", "no visible scratch",
     "no visible dent", "no visible crack", "no broken",
     "intact", "clean", "undamaged", "no issues", "no defects",
+    "no torn", "no tear", "no crushing", "no crush",
+    "package seal does not show", "seal does not show",
+    "not torn", "no missing", "no broken", "no sign of tear",
+    "no sign of torn", "shows only", "does not show torn",
 )
 
 
@@ -144,12 +155,61 @@ def _visible_issues_concrete(visible_issues: List[Dict[str, Any]]) -> bool:
 # Layer 3: taxonomy correction keywords
 # ---------------------------------------------------------------------------
 
-_SHATTER_HINTS = ("shatter", "spider", "radiating", "missing glass", "shattered")
+# Trigger phrases that indicate the VLM actually saw a TRUE shatter
+# (spider pattern, missing glass pieces, broken shards). If NONE of these
+# are present in the VLM's blurb, a glass_shatter call is treated as a
+# single fracture (crack) instead.
+_SHATTER_HINTS = ("shatter", "spider", "radiating", "missing glass", "shattered",
+                  "shattered into", "spiderweb", "spider pattern",
+                  "shattered glass", "shatters", "broken into pieces",
+                  "broken glass", "pieces missing", "broken shards",
+                  "shards of glass", "glass shards", "missing pieces",
+                  "completely shattered", "shattered completely")
+
+# Trigger phrases that indicate the VLM saw a NON-deforming surface
+# mark (scratch, scrape, paint transfer) rather than a real dent.
 _NO_DEFORM_HINTS = ("surface mark", "no deformation", "no dent",
-                    "scratch on", "scratch across", "line on", "line across")
-_RESIDUE_HINTS = ("stain", "residue", "discoloration", "discolored")
+                    "scratch on", "scratch across", "line on", "line across",
+                    "scrape", "scratch", "scratched",
+                    "scrape or scratch", "scratch or scrape",
+                    "mark on surface", "mark on the surface",
+                    "no indentation", "no concave", "not concave",
+                    "paint transfer", "clear coat", "clear-coat",
+                    "surface only", "no panel pushed", "surface-level",
+                    "minor mark", "minor scratch", "minor scrape")
+
+# Phrases whose ABSENCE means the description does NOT contain evidence of
+# actual deformation. If NONE are present in the blurb, a dent call is
+# downgraded to scratch (because the VLM described no panel push-in,
+# concavity, etc.).
+_DEFORM_HINTS = ("deformation", "deformed", "concave", "concavity",
+                 "indentation", "indented", "panel pushed in",
+                 "panel is pushed", "metal pushed", "metal pushed in",
+                 "metal is pushed", "dented inward", "pushed inward",
+                 "structural deformation", "crushed", "buckled",
+                 "crumpled metal", "deep dent", "deep indentation",
+                 "significant dent", "large dent", "major dent")
+
+# Trigger phrases for residue/stain (used to downgrade water_damage to stain
+# when no real water damage pattern is described).
+_RESIDUE_HINTS = ("stain", "residue", "discoloration", "discolored",
+                  "discolor", "staining", "stained", "ring", "tide",
+                  "marks on", "mark on", "streak", "streaks",
+                  "water droplets", "droplets", "water spill",
+                  "liquid spill", "spill residue", "spilled liquid",
+                  "sticky", "sticky keys", "residue from", "mark from")
+
+# Trigger phrases whose ABSENCE means the description does NOT contain
+# evidence of actual water damage (corrosion, swelling, short-circuit).
+# If NONE present, water_damage is downgraded to stain.
 _WET_HINTS = ("wet", "water pattern", "water stain", "tide line",
-              "water mark", "water damage", "soaked", "moisture")
+              "water mark", "water damage", "soaked", "moisture",
+              "corrosion", "corroded", "rust", "rusted",
+              "swelling", "swollen", "warped", "warping",
+              "short circuit", "short-circuit", "fried",
+              "liquid damage", "liquid penetration", "liquid entered",
+              "mineral deposit", "water marks", "oxidation",
+              "circuit damage", "component damage", "board damage")
 
 
 # ---------------------------------------------------------------------------
@@ -283,8 +343,58 @@ def apply_rules_v2(
     # issue_type to "none" / "unknown", which makes later layers no-ops.
     # ------------------------------------------------------------------
     if layer_visibility:
+        # Pre-compute the flag for whether the VLM emitted a concrete
+        # damage type (anything other than "none" / "unknown" / "").
+        vlm_issue_is_concrete = vlm_issue_type not in (
+            "none", "unknown", ""
+        )
+
+        # 0. "Part not visible" gate — fires FIRST so it pre-empts the
+        # claim_mismatch branch. If the VLM's blurb talks about the
+        # relevant part not being visible / not being in the frame /
+        # not being evaluable, the right status is
+        # not_enough_information (we genuinely cannot see whether the
+        # user's claim is true), NOT contradicted.
+        if (not vlm_issue_is_concrete
+                and _contains_any(vlm_blurb, _NOT_VISIBLE_PHRASES)):
+            claim_status = "not_enough_information"
+            issue_type = "unknown"
+            severity = "unknown"
+            valid_image = normalize_bool(vlm_output.get("valid_image", True))
+            if vlm_non_original_image or vlm_possible_manipulation:
+                valid_image = False
+            if not justification:
+                justification = (
+                    "The relevant part is not visible in the "
+                    "submitted images."
+                )
+
+        # 0b. Concrete missing_part with no clear view of the contents —
+        # missing_part requires seeing inside the package and confirming
+        # the item is absent. If the blurb only describes the packing
+        # material ("only crumpled paper", "no item visible", etc.),
+        # the evidence is insufficient -> not_enough_information.
+        elif (vlm_issue_type == "missing_part"
+              and _contains_any(vlm_blurb, (
+                  "only crumpled", "only packing", "no item visible",
+                  "no product visible", "no contents visible",
+                  "cannot confirm", "cannot verify",
+                  "only paper", "only bubble wrap", "only styrofoam",
+                  "only foam", "only cardboard", "only tissue",
+                  "no clear view", "not clearly visible",
+              ))):
+            claim_status = "not_enough_information"
+            issue_type = "unknown"
+            severity = "unknown"
+            if not justification:
+                justification = (
+                    "The submitted images do not clearly show the "
+                    "package contents, so the missing-item claim "
+                    "cannot be verified."
+                )
+
         # 1. claim_mismatch + no visible damage -> contradicted (none/none)
-        if vlm_claim_mismatch and not has_concrete_visible_issue:
+        elif vlm_claim_mismatch and not has_concrete_visible_issue:
             claim_status = "contradicted"
             issue_type = "none"
             severity = "none"
@@ -370,8 +480,13 @@ def apply_rules_v2(
     # ------------------------------------------------------------------
     # Enforce NEI invariants on the other fields.
     # ------------------------------------------------------------------
+    # Per the rubric, valid_image is only False for unreadable / tampered
+    # images (non_original / possible_manipulation). A wrong-object match
+    # does NOT make the image unreadable — the image still shows something
+    # — so we keep valid_image=True and let the wrong_object risk flag
+    # convey the structural mismatch.
     valid_image = normalize_bool(vlm_output.get("valid_image", True))
-    if vlm_wrong_object or vlm_non_original_image or vlm_possible_manipulation:
+    if vlm_non_original_image or vlm_possible_manipulation:
         valid_image = False
 
     if claim_status == "not_enough_information":
