@@ -1,0 +1,10 @@
+{
+  "succeeded": 20,
+  "failed": 0,
+  "qwen_total_ms": 0,
+  "judge_total_ms": 191867,
+  "qwen_mean_ms": 0,
+  "judge_mean_ms": 9593,
+  "runtime_seconds": 192.242427110672,
+  "text_model": "mimo-v2-flash"
+}

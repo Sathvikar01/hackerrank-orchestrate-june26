@@ -229,6 +229,14 @@ class QwenClient:
                     f"Modal RPC failed on retry: {exc}"
                 ) from exc
 
+            # Preserve _meta (latency_ms, image_count, model_id) across
+            # the schema round-trip so the caller can read it.
+            meta = (
+                raw_response.get("_meta", {})
+                if isinstance(raw_response, dict)
+                else {}
+            )
+
             try:
                 parsed = parse_qwen_output(
                     json.dumps(raw_response), object_type=object_type
@@ -239,6 +247,9 @@ class QwenClient:
                     time.sleep(1.0)
                     continue
                 raise
+
+            if meta:
+                parsed["_meta"] = meta
 
             if use_cache:
                 with open(cache_path, "w", encoding="utf-8") as f:
