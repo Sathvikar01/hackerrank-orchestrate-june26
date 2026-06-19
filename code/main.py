@@ -32,7 +32,7 @@ def main():
     parser.add_argument(
         "--prompt-version",
         type=str,
-        default="v1",
+        default="v2",
         help="Prompt version to use",
     )
     parser.add_argument(
