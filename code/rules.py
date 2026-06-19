@@ -134,6 +134,7 @@ def compose_risk_flags(
     image_quality_flags: List[str],
     evidence_standard_met: bool,
     valid_image: bool,
+    deterministic_quality_flags: Optional[List[str]] = None,
 ) -> str:
     flags: Set[str] = set()
 
@@ -142,6 +143,13 @@ def compose_risk_flags(
         normalized = _normalize_risk_flag(f)
         if normalized and normalized != "none":
             flags.add(normalized)
+
+    # Deterministic OpenCV-detected flags
+    if deterministic_quality_flags:
+        for f in deterministic_quality_flags:
+            normalized = _normalize_risk_flag(f)
+            if normalized and normalized != "none":
+                flags.add(normalized)
 
     # Structural VLM detections
     if normalize_bool(vlm_output.get("claim_mismatch")):
@@ -173,7 +181,12 @@ def compose_risk_flags(
     return ";".join(sorted(flags))
 
 
-def apply_rules(claim_object: str, vlm_output: Dict[str, Any], user_history: Dict[str, Any]) -> Dict[str, Any]:
+def apply_rules(
+    claim_object: str,
+    vlm_output: Dict[str, Any],
+    user_history: Dict[str, Any],
+    deterministic_quality_flags: Optional[List[str]] = None,
+) -> Dict[str, Any]:
     """Take raw VLM output and enforce schema/consistency rules."""
     # Validity
     valid_image = normalize_bool(vlm_output.get("valid_image", True))
@@ -229,6 +242,7 @@ def apply_rules(claim_object: str, vlm_output: Dict[str, Any], user_history: Dic
         raw_quality_flags,
         evidence_standard_met,
         valid_image,
+        deterministic_quality_flags=deterministic_quality_flags,
     )
 
     reason = str(vlm_output.get("evidence_standard_met_reason", "")).strip()

@@ -78,7 +78,7 @@ class VLMClient:
             model=model,
             messages=messages,
             temperature=TEMPERATURE,
-            max_tokens=2048,
+            max_tokens=8192,
             timeout=REQUEST_TIMEOUT,
         )
         content = response.choices[0].message.content or ""

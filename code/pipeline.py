@@ -12,6 +12,7 @@ from schema import EVIDENCE_REQUIREMENTS_BY_OBJECT, OUTPUT_COLUMNS
 from prompts import build_inspection_prompt
 from models import VLMClient, parse_json_from_text
 from rules import apply_rules, normalize_supporting_ids
+from image_quality import analyze_images
 
 
 def load_user_history(path: Path) -> Dict[str, Dict[str, Any]]:
@@ -74,6 +75,7 @@ def process_claim(
         user_history=user_history,
         evidence_requirements=reqs,
         image_count=len(abs_image_paths),
+        prompt_version=prompt_version,
     )
 
     vlm_result = vlm_client.call(
@@ -89,7 +91,7 @@ def process_claim(
         "model": vlm_result.get("model", model),
         "usage": vlm_result.get("usage", {}),
         "latency": vlm_result.get("latency", 0.0),
-        "cache_hit": vlm_result.get("cache_key") is not None,
+        "cache_hit": vlm_result.get("cache_hit", False),
     }
 
     if vlm_output is None:
@@ -114,7 +116,16 @@ def process_claim(
         }
         metadata["parse_error"] = True
 
-    final = apply_rules(claim_object, vlm_output, user_history)
+    deterministic_quality = analyze_images(abs_image_paths)
+    deterministic_quality_flags = [k for k, v in deterministic_quality.items() if v]
+    metadata["deterministic_quality_flags"] = deterministic_quality_flags
+
+    final = apply_rules(
+        claim_object,
+        vlm_output,
+        user_history,
+        deterministic_quality_flags=deterministic_quality_flags,
+    )
 
     output_row = {
         "user_id": user_id,
@@ -142,7 +153,7 @@ def run_pipeline(
     user_history_csv: Path = DATASET_DIR / "user_history.csv",
     evidence_requirements_csv: Path = DATASET_DIR / "evidence_requirements.csv",
     model: Optional[str] = None,
-    prompt_version: str = "v1",
+    prompt_version: str = "v2",
 ) -> Dict[str, Any]:
     input_csv = Path(input_csv).resolve()
     output_csv = Path(output_csv).resolve()
