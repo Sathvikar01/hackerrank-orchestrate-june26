@@ -648,6 +648,52 @@ def apply_rules_v2(
                 and "manual_review_required" not in flag_set):
             flag_set.add("manual_review_required")
 
+        # Gate cropped_or_obstructed: keep only if the VLM's blurb actually
+        # mentions cropping, obstruction, or blockage. The VLM's
+        # image_quality_flags can be a false positive on clean rows.
+        if "cropped_or_obstructed" in flag_set:
+            crop_hints = (
+                "crop", "cropped", "cut off", "obstruct", "obstruction",
+                "block", "blocked", "partial", "partially visible",
+                "edge of frame", "out of frame", "only part",
+            )
+            if not _contains_any(vlm_blurb, crop_hints):
+                flag_set.discard("cropped_or_obstructed")
+
+        # Gate possible_manipulation: keep only if the VLM's blurb actually
+        # mentions manipulation, editing, or digital alteration.
+        if "possible_manipulation" in flag_set:
+            manip_hints = (
+                "manipulat", "manipulated", "edit", "edited", "alter",
+                "altered", "photoshop", "digital alteration", "compos",
+                "composite", "airbrush", "photo editing", "tamper",
+                "tampered", "fake", "forged", "photoshopped",
+            )
+            if not _contains_any(vlm_blurb, manip_hints):
+                flag_set.discard("possible_manipulation")
+
+        # manual_review_required from user_history: if the user's history
+        # flags indicate risk, always add manual_review_required.
+        if isinstance(user_history, dict):
+            uh_flags = str(user_history.get("history_flags", "")).lower()
+            if ("user_history_risk" in uh_flags
+                    or "manual_review_required" in uh_flags):
+                if "manual_review_required" not in flag_set:
+                    flag_set.add("manual_review_required")
+
+        # damage_not_visible for contradicted rows where the VLM emitted a
+        # concrete issue_type that contradicts the user's claim (e.g., the
+        # user claims a torn seal but the visible_issues show a different
+        # type, or the user claims major damage but the VLM found minor).
+        if (claim_status == "contradicted"
+                and issue_type not in ("none", "unknown")
+                and "damage_not_visible" not in flag_set):
+            # Only add if the issue_type from visible_issues doesn't match
+            # what the user claimed (heuristic: the issue_type is present
+            # but the claim is contradicted, meaning the visible damage
+            # doesn't support the claim).
+            flag_set.add("damage_not_visible")
+
         risk_flags = ";".join(sorted(flag_set)) if flag_set else "none"
     else:
         risk_flags = compose_risk_flags(
