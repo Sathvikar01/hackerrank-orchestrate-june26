@@ -116,6 +116,11 @@ qwen_image = (
         "pillow==10.4.0",
         "jsonschema==4.23.0",
     )
+# Bundle the schema validator so it lives inside the deployed image.
+    # This avoids the local-vs-installed Modal namespace race at runtime.
+    # ``add_local_python_source`` makes the file importable by its stem
+    # (``import qwen_schema``).
+    .add_local_python_source("modal/qwen_schema.py")
     .env(
         {
             "QWEN_MODEL_ID": QWEN_MODEL_ID,
@@ -404,8 +409,10 @@ class QwenVL:
         )[0]
         latency_ms = int((time.time() - t0) * 1000)
 
-        # Parse + validate JSON.
-        from modal.qwen_schema import parse_qwen_output
+        # Parse + validate JSON. The schema module is bundled into the
+        # container image via ``add_local_python_source`` above, so we can
+        # import it by its top-level name (``qwen_schema``).
+        from qwen_schema import parse_qwen_output
 
         parsed = parse_qwen_output(raw_text)
 
