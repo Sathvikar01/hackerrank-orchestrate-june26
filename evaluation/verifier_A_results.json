@@ -1,0 +1,315 @@
+{
+  "total": 20,
+  "consistent": 17,
+  "inconsistent": 3,
+  "history_risk_propagated": 6,
+  "added_flag_distribution": {
+    "user_history_risk": 6,
+    "manual_review_required": 2
+  },
+  "verdicts": [
+    {
+      "user_id": "user_001",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_002",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_004",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [
+          "user_history_risk"
+        ],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": [
+          "user_history_risk"
+        ]
+      }
+    },
+    {
+      "user_id": "user_007",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_005",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [
+          "user_history_risk",
+          "manual_review_required"
+        ],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": [
+          "user_history_risk",
+          "manual_review_required"
+        ]
+      }
+    },
+    {
+      "user_id": "user_006",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "severity='none' but evidence_sufficient=false"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "severity='none' but evidence_sufficient=false"
+        ],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_003",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_008",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "severity='high' but evidence_sufficient=false"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [
+          "user_history_risk"
+        ],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "severity='high' but evidence_sufficient=false"
+        ],
+        "history_risk_flags": [
+          "user_history_risk"
+        ]
+      }
+    },
+    {
+      "user_id": "user_009",
+      "claim_object": "laptop",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_010",
+      "claim_object": "laptop",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_011",
+      "claim_object": "laptop",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_012",
+      "claim_object": "laptop",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_018",
+      "claim_object": "laptop",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [
+          "user_history_risk"
+        ],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": [
+          "user_history_risk"
+        ]
+      }
+    },
+    {
+      "user_id": "user_020",
+      "claim_object": "laptop",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_015",
+      "claim_object": "package",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_030",
+      "claim_object": "package",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_031",
+      "claim_object": "package",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [
+          "user_history_risk"
+        ],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": [
+          "user_history_risk"
+        ]
+      }
+    },
+    {
+      "user_id": "user_032",
+      "claim_object": "package",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_033",
+      "claim_object": "package",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "severity='none' but evidence_sufficient=false"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [
+          "user_history_risk",
+          "manual_review_required"
+        ],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "severity='none' but evidence_sufficient=false"
+        ],
+        "history_risk_flags": [
+          "user_history_risk",
+          "manual_review_required"
+        ]
+      }
+    },
+    {
+      "user_id": "user_034",
+      "claim_object": "package",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    }
+  ],
+  "text_model": "mimo-v2-flash",
+  "use_llm": false,
+  "runtime_seconds": 0.6376173496246338
+}
