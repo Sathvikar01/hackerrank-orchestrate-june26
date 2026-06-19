@@ -73,6 +73,8 @@ from __future__ import annotations
 import io
 import json
 import os
+import pathlib
+import re
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -105,6 +107,12 @@ QWEN_MAX_NEW_TOKENS = int(os.environ.get("QWEN_MAX_NEW_TOKENS", "512"))
 # Container image: Pinned versions for reproducibility.
 # - torch 2.4.x supports qwen2_5_vl natively (transformers >= 4.49).
 # - flash-attn 2 for memory-efficient attention on A10G.
+#
+# The schema validator is inlined below as ``_parse_qwen_output`` to avoid
+# the brittle ``add_local_python_source`` cross-platform path issue on
+# Windows. The canonical schema still lives in ``modal/qwen_schema.py``
+# for the local client and tests; the inline copy is the deployment-time
+# source of truth.
 qwen_image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install(
@@ -115,12 +123,9 @@ qwen_image = (
         "qwen-vl-utils==0.0.8",
         "pillow==10.4.0",
         "jsonschema==4.23.0",
+        # httpx used by the modal client to talk to the @modal.method RPC.
+        "httpx==0.27.2",
     )
-# Bundle the schema validator so it lives inside the deployed image.
-    # This avoids the local-vs-installed Modal namespace race at runtime.
-    # ``add_local_python_source`` makes the file importable by its stem
-    # (``import qwen_schema``).
-    .add_local_python_source("modal/qwen_schema.py")
     .env(
         {
             "QWEN_MODEL_ID": QWEN_MODEL_ID,
@@ -201,6 +206,192 @@ def _resize_image(path: str, max_dim: int) -> bytes:
 
 
 # ---------------------------------------------------------------------------
+# Inline schema validator (mirrors modal/qwen_schema.py)
+# ---------------------------------------------------------------------------
+#
+# This block is intentionally duplicated from ``modal/qwen_schema.py`` so
+# the Modal container image does not need to bundle a local Python
+# source file. Keep the two in sync when modifying the schema.
+# ---------------------------------------------------------------------------
+
+
+class _QwenSchemaError(ValueError):
+    """Raised when model output does not conform to the schema."""
+
+
+_INLINE_ISSUE_TYPES = [
+    "dent", "scratch", "crack", "glass_shatter", "broken_part",
+    "missing_part", "torn_packaging", "crushed_packaging", "water_damage",
+    "stain", "none", "unknown",
+]
+_INLINE_SEVERITY = ["none", "low", "medium", "high", "unknown"]
+_INLINE_QUALITY_FLAGS = [
+    "blurry_image", "cropped_or_obstructed", "low_light_or_glare",
+    "wrong_angle", "wrong_object", "wrong_object_part", "damage_not_visible",
+    "claim_mismatch", "possible_manipulation", "non_original_image",
+    "text_instruction_present",
+]
+_INLINE_OBJECT_PARTS = {
+    "car": [
+        "front_bumper", "rear_bumper", "door", "hood", "windshield",
+        "side_mirror", "headlight", "taillight", "fender", "quarter_panel",
+        "body", "unknown",
+    ],
+    "laptop": [
+        "screen", "keyboard", "trackpad", "hinge", "lid", "corner", "port",
+        "base", "body", "unknown",
+    ],
+    "package": [
+        "box", "package_corner", "package_side", "seal", "label", "contents",
+        "item", "unknown",
+    ],
+}
+
+
+_INLINE_ISSUE_ALIASES = {
+    "dented": "dent", "scratched": "scratch", "cracked": "crack",
+    "shattered": "glass_shatter", "shatter": "glass_shatter",
+    "broken": "broken_part", "break": "broken_part",
+    "missing": "missing_part", "torn": "torn_packaging",
+    "crushed": "crushed_packaging", "wet": "water_damage",
+    "water": "water_damage", "stained": "stain",
+    "no_damage": "none", "no_issue": "none", "ok": "none", "fine": "none",
+}
+_INLINE_SEVERITY_ALIASES = {
+    "no": "none", "minor": "low", "small": "low", "moderate": "medium",
+    "moderate_damage": "medium", "severe": "high", "major": "high",
+    "critical": "high", "unsure": "unknown", "cant_tell": "unknown",
+    "cannot_tell": "unknown", "n/a": "unknown", "na": "unknown",
+}
+_INLINE_PART_ALIASES = {
+    "front_bumper": "front_bumper", "rear_bumper": "rear_bumper",
+    "back_bumper": "rear_bumper", "windshield": "windshield",
+    "front_glass": "windshield", "rear_glass": "windshield",
+    "side_mirror": "side_mirror", "wing_mirror": "side_mirror",
+    "headlight": "headlight", "headlamp": "headlight",
+    "taillight": "taillight", "taillamp": "taillight",
+    "tail_light": "taillight", "quarter_panel": "quarter_panel",
+    "screen": "screen", "display": "screen", "lcd": "screen",
+    "keyboard": "keyboard", "trackpad": "trackpad", "hinge": "hinge",
+    "lid": "lid", "corner": "corner", "port": "port", "base": "base",
+    "box": "box", "package_corner": "package_corner",
+    "package_side": "package_side", "seal": "seal", "label": "label",
+    "contents": "contents", "item": "item",
+}
+
+
+def _inline_fuzzy(value: Any, allowed: List[str], aliases: Dict[str, str]) -> str:
+    if value is None:
+        return "__invalid__"
+    s = str(value).strip().lower().replace(" ", "_").replace("-", "_")
+    if s in allowed:
+        return s
+    if s in aliases and aliases[s] in allowed:
+        return aliases[s]
+    for a in allowed:
+        if s == a or s in a or a in s:
+            return a
+    return "__invalid__"
+
+
+def _inline_coerce_quality_flags(value: Any) -> List[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        value = [v.strip() for v in re.split(r"[,;|]", value) if v.strip()]
+    if not isinstance(value, list):
+        return []
+    cleaned: List[str] = []
+    for v in value:
+        s = str(v).strip().lower().replace(" ", "_").replace("-", "_")
+        if s in _INLINE_QUALITY_FLAGS and s not in cleaned:
+            cleaned.append(s)
+    return cleaned
+
+
+def _inline_coerce_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    if isinstance(value, (int, float)):
+        return bool(value)
+    s = str(value).strip().lower()
+    if s in ("true", "yes", "1", "t", "y"):
+        return True
+    if s in ("false", "no", "0", "f", "n"):
+        return False
+    raise _QwenSchemaError(f"bool: {value!r} not recognised")
+
+
+def _parse_qwen_output(raw_text: str, object_type: str = "") -> Dict[str, Any]:
+    """Parse + validate model output text. Mirrors ``modal.qwen_schema.parse_qwen_output``."""
+    text = (raw_text or "").strip()
+    if not text:
+        raise _QwenSchemaError("Model returned empty text.")
+    if text.startswith("```"):
+        lines = text.splitlines()
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].startswith("```"):
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+    if not text.startswith("{"):
+        start = text.find("{")
+        end = text.rfind("}")
+        if start == -1 or end == -1 or end <= start:
+            raise _QwenSchemaError(f"No JSON object found: {text[:200]!r}")
+        text = text[start : end + 1]
+    try:
+        raw = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise _QwenSchemaError(f"JSON decode failed: {exc}") from exc
+    if not isinstance(raw, dict):
+        raise _QwenSchemaError(
+            f"Expected JSON object, got {type(raw).__name__}"
+        )
+
+    if "visible_damage" not in raw:
+        raise _QwenSchemaError("visible_damage: missing")
+    if "evidence_sufficient" not in raw:
+        raise _QwenSchemaError("evidence_sufficient: missing")
+
+    issue_type = _inline_fuzzy(
+        raw.get("issue_type"), _INLINE_ISSUE_TYPES, _INLINE_ISSUE_ALIASES
+    )
+    if issue_type == "__invalid__":
+        raise _QwenSchemaError(
+            f"issue_type: {raw.get('issue_type')!r} not in allowed"
+        )
+
+    severity = _inline_fuzzy(
+        raw.get("severity"), _INLINE_SEVERITY, _INLINE_SEVERITY_ALIASES
+    )
+    if severity == "__invalid__":
+        raise _QwenSchemaError(
+            f"severity: {raw.get('severity')!r} not in allowed"
+        )
+
+    allowed_parts = _INLINE_OBJECT_PARTS.get(object_type, ["unknown"])
+    object_part = _inline_fuzzy(
+        raw.get("object_part"), allowed_parts, _INLINE_PART_ALIASES
+    )
+    if object_part == "__invalid__":
+        raise _QwenSchemaError(
+            f"object_part: {raw.get('object_part')!r} not in allowed"
+        )
+
+    return {
+        "issue_type": issue_type,
+        "object_part": object_part,
+        "severity": severity,
+        "visible_damage": _inline_coerce_bool(raw.get("visible_damage")),
+        "evidence_sufficient": _inline_coerce_bool(raw.get("evidence_sufficient")),
+        "quality_flags": _inline_coerce_quality_flags(raw.get("quality_flags")),
+    }
+
+
+# ---------------------------------------------------------------------------
 # Modal class: holds the model + processor across calls in the same container
 # ---------------------------------------------------------------------------
 
@@ -210,9 +401,7 @@ def _resize_image(path: str, max_dim: int) -> bytes:
     image=qwen_image,
     volumes={CACHE_DIR: qwen_cache_vol},
     scaledown_window=60,           # scale to zero after 60 s of idle
-    concurrency_limit=1,           # one inference at a time per container
-    allow_concurrent_inputs=4,     # buffer up to 4 inputs before new container
-    container_idle_timeout=300,    # safety: kill containers idle > 5 min
+    max_containers=1,              # one inference at a time per container
     timeout=600,                   # hard ceiling per request
 )
 class QwenVL:
@@ -296,11 +485,26 @@ class QwenVL:
     @modal.method()
     def predict_damage(
         self,
-        image_paths: List[str],
-        claim_text: str,
-        object_type: str,
+        image_paths: Optional[List[str]] = None,
+        claim_text: str = "",
+        object_type: str = "",
+        image_bytes: Optional[List[bytes]] = None,
     ) -> Dict[str, Any]:
         """Run Qwen2.5-VL on the supplied images + claim and return structured JSON.
+
+        Inputs
+        ------
+        image_paths
+            Absolute paths to images on the container's local filesystem.
+            Mutually exclusive with ``image_bytes``.
+        image_bytes
+            List of raw image bytes (JPEG/PNG). The container saves them
+            to ``CACHE_DIR`` and then runs inference. Preferred for cross-
+            machine calls (avoids needing a shared filesystem).
+        claim_text
+            The user-claim transcript.
+        object_type
+            One of ``car`` / ``laptop`` / ``package``.
 
         Returns
         -------
@@ -324,7 +528,19 @@ class QwenVL:
         import torch
         from qwen_vl_utils import process_vision_info
 
-        if not image_paths:
+        sources: List[str] = []
+        if image_bytes:
+            for b in image_bytes:
+                if not b:
+                    continue
+                tmp = Path(CACHE_DIR) / f"in_{int(time.time()*1000)}_{len(sources)}.jpg"
+                tmp.parent.mkdir(parents=True, exist_ok=True)
+                tmp.write_bytes(b)
+                sources.append(str(tmp))
+        if image_paths:
+            sources.extend(p for p in image_paths if p)
+
+        if not sources:
             return {
                 "issue_type": "unknown",
                 "object_part": "unknown",
@@ -343,7 +559,7 @@ class QwenVL:
         # number of vision tokens stays bounded.
         max_dim = int(os.environ.get("QWEN_MAX_IMAGE_DIM", "1024"))
         resized_paths: List[str] = []
-        for p in image_paths:
+        for p in sources:
             try:
                 data = _resize_image(p, max_dim)
                 # Write to a temporary file inside the cache volume so the
@@ -409,12 +625,11 @@ class QwenVL:
         )[0]
         latency_ms = int((time.time() - t0) * 1000)
 
-        # Parse + validate JSON. The schema module is bundled into the
-        # container image via ``add_local_python_source`` above, so we can
-        # import it by its top-level name (``qwen_schema``).
-        from qwen_schema import parse_qwen_output
-
-        parsed = parse_qwen_output(raw_text)
+        # Parse + validate JSON using the inlined schema parser. The
+        # canonical source of truth lives in ``modal/qwen_schema.py``
+        # for the local client; this inline copy keeps deployment simple
+        # (no cross-platform path issues with add_local_python_source).
+        parsed = _parse_qwen_output(raw_text, object_type=object_type)
 
         parsed["_meta"] = {
             "latency_ms": latency_ms,
@@ -429,43 +644,58 @@ class QwenVL:
 # ---------------------------------------------------------------------------
 
 
-@app.function(
-    scaledown_window=60,    # scale the endpoint to zero after 60 s of idle
-    timeout=120,
-)
-@modal.web_endpoint(method="POST")
-def predict_damage_http(item: Dict[str, Any]) -> Dict[str, Any]:
-    """HTTPS endpoint exposing ``predict_damage``.
+# ---------------------------------------------------------------------------
+# Web endpoint (disabled — using @modal.method instead to avoid the
+# fastapi endpoint's hard requirement on the fastapi package).
+# ---------------------------------------------------------------------------
+#
+# To expose an HTTP endpoint, set ``MODAL_HTTP_ENDPOINT=1`` before
+# deploying. This requires the fastapi package to be installed (handled
+# automatically by Modal when the flag is on; for now we use the
+# @modal.method RPC interface, which is sufficient for the local
+# ``modal.qwen_client`` harness).
+# ---------------------------------------------------------------------------
 
-    POST JSON body::
+_USE_HTTP = os.environ.get("MODAL_HTTP_ENDPOINT", "0") == "1"
 
-        {
-            "image_paths": ["/abs/path/img1.jpg", ...],
-            "claim_text": "...",
-            "object_type": "car|laptop|package"
-        }
 
-    Response: schema-conformant JSON dict (see ``modal.qwen_schema``).
+if _USE_HTTP:
 
-    Modal will spin up an A10G container on first call after idle, keep it
-    warm for ``scaledown_window`` seconds, then scale to zero.
-    """
-    image_paths = item.get("image_paths", [])
-    claim_text = item.get("claim_text", "")
-    object_type = item.get("object_type", "")
-
-    if not isinstance(image_paths, list) or not image_paths:
-        raise ValueError("image_paths must be a non-empty list of strings")
-
-    return QwenVL().predict_damage.remote(
-        image_paths=image_paths,
-        claim_text=claim_text,
-        object_type=object_type,
+    @app.function(
+        scaledown_window=60,
+        timeout=120,
     )
+    @modal.fastapi_endpoint(method="POST")
+    def predict_damage_http(item: Dict[str, Any]) -> Dict[str, Any]:
+        """HTTPS endpoint exposing ``predict_damage``.
+
+        POST JSON body::
+
+            {
+                "image_paths": ["/abs/path/img1.jpg", ...],
+                "claim_text": "...",
+                "object_type": "car|laptop|package"
+            }
+
+        Modal spins up an A10G container on first call after idle, keeps
+        it warm for ``scaledown_window`` seconds, then scales to zero.
+        """
+        image_paths = item.get("image_paths", [])
+        claim_text = item.get("claim_text", "")
+        object_type = item.get("object_type", "")
+
+        if not isinstance(image_paths, list) or not image_paths:
+            raise ValueError("image_paths must be a non-empty list of strings")
+
+        return QwenVL().predict_damage.remote(
+            image_paths=image_paths,
+            claim_text=claim_text,
+            object_type=object_type,
+        )
 
 
 # ---------------------------------------------------------------------------
-# Local smoke test
+# Local smoke test (uses Modal's RPC, not HTTP)
 # ---------------------------------------------------------------------------
 
 

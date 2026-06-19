@@ -1,0 +1,343 @@
+{
+  "total": 20,
+  "consistent": 10,
+  "inconsistent": 10,
+  "history_risk_propagated": 6,
+  "added_flag_distribution": {
+    "user_history_risk": 6,
+    "manual_review_required": 2
+  },
+  "verdicts": [
+    {
+      "user_id": "user_001",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_002",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_004",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [
+          "user_history_risk"
+        ],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": [
+          "user_history_risk"
+        ]
+      }
+    },
+    {
+      "user_id": "user_007",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_005",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [
+          "user_history_risk",
+          "manual_review_required"
+        ],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": [
+          "user_history_risk",
+          "manual_review_required"
+        ]
+      }
+    },
+    {
+      "user_id": "user_006",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_003",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_008",
+      "claim_object": "car",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [
+          "user_history_risk"
+        ],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": [
+          "user_history_risk"
+        ]
+      }
+    },
+    {
+      "user_id": "user_009",
+      "claim_object": "laptop",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_010",
+      "claim_object": "laptop",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "issue_type='broken_part' but object_part=unknown"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "issue_type='broken_part' but object_part=unknown"
+        ],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_011",
+      "claim_object": "laptop",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "issue_type='water_damage' but object_part=unknown"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "issue_type='water_damage' but object_part=unknown"
+        ],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_012",
+      "claim_object": "laptop",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "issue_type='dent' but object_part=unknown"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "issue_type='dent' but object_part=unknown"
+        ],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_018",
+      "claim_object": "laptop",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "issue_type='crack' but object_part=unknown"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [
+          "user_history_risk"
+        ],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "issue_type='crack' but object_part=unknown"
+        ],
+        "history_risk_flags": [
+          "user_history_risk"
+        ]
+      }
+    },
+    {
+      "user_id": "user_020",
+      "claim_object": "laptop",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "issue_type='torn_packaging' but object_part=unknown"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "issue_type='torn_packaging' but object_part=unknown"
+        ],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_015",
+      "claim_object": "package",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "issue_type='crushed_packaging' but object_part=unknown"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "issue_type='crushed_packaging' but object_part=unknown"
+        ],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_030",
+      "claim_object": "package",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "issue_type='torn_packaging' but object_part=unknown"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "issue_type='torn_packaging' but object_part=unknown"
+        ],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_031",
+      "claim_object": "package",
+      "verdict": {
+        "consistent": true,
+        "errors": [],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [
+          "user_history_risk"
+        ],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [],
+        "history_risk_flags": [
+          "user_history_risk"
+        ]
+      }
+    },
+    {
+      "user_id": "user_032",
+      "claim_object": "package",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "issue_type='missing_part' but object_part=unknown"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "issue_type='missing_part' but object_part=unknown"
+        ],
+        "history_risk_flags": []
+      }
+    },
+    {
+      "user_id": "user_033",
+      "claim_object": "package",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "issue_type='crushed_packaging' but object_part=unknown"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [
+          "user_history_risk",
+          "manual_review_required"
+        ],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "issue_type='crushed_packaging' but object_part=unknown"
+        ],
+        "history_risk_flags": [
+          "user_history_risk",
+          "manual_review_required"
+        ]
+      }
+    },
+    {
+      "user_id": "user_034",
+      "claim_object": "package",
+      "verdict": {
+        "consistent": false,
+        "errors": [
+          "issue_type='torn_packaging' but object_part=unknown"
+        ],
+        "recommended_claim_status": null,
+        "recommended_risk_flags_to_add": [],
+        "explanation": "deterministic checks only",
+        "deterministic_errors": [
+          "issue_type='torn_packaging' but object_part=unknown"
+        ],
+        "history_risk_flags": []
+      }
+    }
+  ],
+  "text_model": "mimo-v2-flash",
+  "use_llm": false,
+  "runtime_seconds": 1.0769784450531006
+}

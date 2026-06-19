@@ -1,13 +1,13 @@
 # Multi-Crop Experiment Report
 
-**Generated:** 2026-06-19 08:41:34 UTC
+**Generated:** 2026-06-19 10:18:44 UTC
 **Sample CSV:** `dataset\sample_claims.csv` (20 rows)
 
 ## Status
 
-**B (multicrop) = deferred (Modal not deployed).** All claims fell back to the deterministic stub. Re-run with `QWEN_ENDPOINT_URL` set after `modal deploy`.
+**B (multicrop) = partial run** - 18 succeeded, 2 failed.
 
-**Note:** Modal not deployed; B is deterministic stub. Re-run after modal deploy.
+**Note:** Modal deployed: hackerrank-orchestrate-qwen. B is the live Qwen pipeline with multi-crop.
 
 ## Crops
 
@@ -29,7 +29,7 @@ Each crop is sent independently to Qwen2.5-VL. Predictions are merged:
 
 ## A. Single-shot Qwen (baseline for comparison)
 
-Runtime: 1.2 s
+Runtime: 0.9 s
 
 | Field | Accuracy |
 |---|---|
@@ -41,33 +41,33 @@ Runtime: 1.2 s
 
 ## B. Multi-crop Qwen
 
-Runtime: 1.3 s
-Total crop calls: 20
-Succeeded claims: 0 / 20
-Transport failures: 20
+Runtime: 230.7 s
+Total crop calls: 85
+Succeeded claims: 18 / 20
+Transport failures: 2
 Schema parse failures: 0
 
 | Field | Accuracy |
 |---|---|
-| issue_type | 0.00% |
-| severity | 0.00% |
-| object_part | 0.00% |
-| claim_status | 0.00% |
-| **row_accuracy** | **0.00%** |
+| issue_type | 45.00% |
+| severity | 35.00% |
+| object_part | 40.00% |
+| claim_status | 55.00% |
+| **row_accuracy** | **5.00%** |
 
 ## Head-to-head deltas
 
 | Field | A (single) | B (multicrop) | Delta |
 |---|---|---|---|
-| evidence_standard_met | 85.00% | 0.00% (stub) | -85.00% |
-| risk_flags | 55.00% | 0.00% (stub) | -55.00% |
-| issue_type | 40.00% | 0.00% (stub) | -40.00% |
-| object_part | 90.00% | 0.00% (stub) | -90.00% |
-| claim_status | 85.00% | 0.00% (stub) | -85.00% |
-| supporting_image_ids | 70.00% | 0.00% (stub) | -70.00% |
-| valid_image | 90.00% | 0.00% (stub) | -90.00% |
-| severity | 45.00% | 0.00% (stub) | -45.00% |
-| row_accuracy | 20.00% | 0.00% (stub) | -20.00% |
+| evidence_standard_met | 85.00% | 80.00% | -5.00% |
+| risk_flags | 55.00% | 45.00% | -10.00% |
+| issue_type | 40.00% | 45.00% | +5.00% |
+| object_part | 90.00% | 40.00% | -50.00% |
+| claim_status | 85.00% | 55.00% | -30.00% |
+| supporting_image_ids | 70.00% | 45.00% | -25.00% |
+| valid_image | 90.00% | 90.00% | +0.00% |
+| severity | 45.00% | 35.00% | -10.00% |
+| row_accuracy | 20.00% | 5.00% | -15.00% |
 
 ## Cost projection
 
