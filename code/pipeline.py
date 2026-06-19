@@ -48,6 +48,18 @@ def image_paths_to_abs(image_paths: str) -> List[Path]:
     return abs_paths
 
 
+def filter_readable(paths: List[Path]) -> List[Path]:
+    from PIL import Image, UnidentifiedImageError
+    readable = []
+    for p in paths:
+        try:
+            Image.open(p).verify()
+            readable.append(p)
+        except (UnidentifiedImageError, OSError, ValueError):
+            continue
+    return readable
+
+
 def image_ids_from_paths(image_paths: List[Path]) -> List[str]:
     return [p.stem for p in image_paths]
 
@@ -68,6 +80,63 @@ def process_claim(
     user_history = user_history_map.get(user_id, {})
     reqs = get_applicable_requirements(claim_object, evidence_requirements)
     abs_image_paths = image_paths_to_abs(image_paths_str)
+    readable_paths = filter_readable(abs_image_paths)
+    metadata = {
+        "image_count_declared": len(abs_image_paths),
+        "image_count_readable": len(readable_paths),
+        "unreadable_paths": [str(p) for p in abs_image_paths if p not in readable_paths],
+    }
+
+    if not readable_paths:
+        # No readable images: emit default "cannot evaluate" output
+        vlm_output = {
+            "evidence_standard_met": False,
+            "evidence_standard_met_reason": "All submitted images are unreadable.",
+            "issue_type": "unknown",
+            "object_part": "unknown",
+            "claim_status": "not_enough_information",
+            "claim_status_justification": "None of the submitted images could be opened, so the claim cannot be evaluated from the image set.",
+            "supporting_image_ids": "none",
+            "valid_image": False,
+            "severity": "unknown",
+            "image_quality_flags": ["non_original_image"],
+            "claim_mismatch": False,
+            "wrong_object": False,
+            "wrong_object_part": False,
+            "text_instruction_present": False,
+            "possible_manipulation": True,
+            "non_original_image": True,
+            "visible_issues": [],
+        }
+        deterministic_quality = {"blurry_image": False, "low_light_or_glare": False, "cropped_or_obstructed": True}
+        deterministic_quality_flags = ["cropped_or_obstructed"]
+        final = apply_rules(claim_object, vlm_output, user_history, deterministic_quality_flags=deterministic_quality_flags)
+        output_row = {
+            "user_id": user_id,
+            "image_paths": image_paths_str,
+            "user_claim": user_claim,
+            "claim_object": claim_object,
+            "evidence_standard_met": final["evidence_standard_met"],
+            "evidence_standard_met_reason": final["evidence_standard_met_reason"],
+            "risk_flags": final["risk_flags"],
+            "issue_type": final["issue_type"],
+            "object_part": final["object_part"],
+            "claim_status": final["claim_status"],
+            "claim_status_justification": final["claim_status_justification"],
+            "supporting_image_ids": final["supporting_image_ids"],
+            "valid_image": final["valid_image"],
+            "severity": final["severity"],
+        }
+        metadata.update({"raw_content": "", "model": model, "usage": {}, "latency": 0.0, "cache_hit": False, "no_readable_images": True})
+        return output_row, metadata
+
+    # Use readable paths for VLM and image quality
+    abs_image_paths = readable_paths
+    metadata["raw_content"] = ""
+    metadata["model"] = model
+    metadata["usage"] = {}
+    metadata["latency"] = 0.0
+    metadata["cache_hit"] = False
 
     prompt = build_inspection_prompt(
         claim_object=claim_object,
@@ -86,13 +155,13 @@ def process_claim(
     )
 
     vlm_output = parse_json_from_text(vlm_result.get("content", ""))
-    metadata = {
+    metadata.update({
         "raw_content": vlm_result.get("content", ""),
         "model": vlm_result.get("model", model),
         "usage": vlm_result.get("usage", {}),
         "latency": vlm_result.get("latency", 0.0),
         "cache_hit": vlm_result.get("cache_hit", False),
-    }
+    })
 
     if vlm_output is None:
         # Fallback: structured default
