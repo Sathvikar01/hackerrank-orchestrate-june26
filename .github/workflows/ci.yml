@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main, feature/*, submission/*]
+  pull_request:
+    branches: [main, submission/*]
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r code/requirements.txt
+      - name: Compile check
+        run: |
+          python -m py_compile code/config.py code/schema.py code/prompts.py code/models.py code/rules.py code/pipeline.py code/main.py code/evaluation/main.py code/image_quality.py
+
+  schema-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r code/requirements.txt
+      - name: Validate output.csv schema
+        run: |
+          python -c "
+          import csv
+          with open('output.csv', encoding='utf-8') as f:
+              r = csv.reader(f)
+              header = next(r)
+              rows = list(r)
+          expected = ['user_id','image_paths','user_claim','claim_object','evidence_standard_met','evidence_standard_met_reason','risk_flags','issue_type','object_part','claim_status','claim_status_justification','supporting_image_ids','valid_image','severity']
+          assert header == expected, f'Header mismatch: {header}'
+          assert len(rows) == 44, f'Expected 44 rows, got {len(rows)}'
+          assert all(len(row) == 14 for row in rows), 'Bad row column count'
+          print('Schema OK')
+          "
