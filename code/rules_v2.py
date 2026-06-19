@@ -159,12 +159,23 @@ def _visible_issues_concrete(visible_issues: List[Dict[str, Any]]) -> bool:
 # (spider pattern, missing glass pieces, broken shards). If NONE of these
 # are present in the VLM's blurb, a glass_shatter call is treated as a
 # single fracture (crack) instead.
-_SHATTER_HINTS = ("shatter", "spider", "radiating", "missing glass", "shattered",
-                  "shattered into", "spiderweb", "spider pattern",
-                  "shattered glass", "shatters", "broken into pieces",
-                  "broken glass", "pieces missing", "broken shards",
-                  "shards of glass", "glass shards", "missing pieces",
-                  "completely shattered", "shattered completely")
+#
+# Per annotation_conventions.md: "Multiple radiating fractures from one
+# impact are still crack + medium when the glass surface is largely
+# intact and no pieces are missing." So 'radiating' alone is NOT a
+# shatter signal — we require explicit spider-web / missing-glass /
+# broken-shard language.
+_STRICT_SHATTER_HINTS = ("shatter", "spider", "missing glass", "shattered",
+                         "shattered into", "spiderweb", "spider pattern",
+                         "shattered glass", "shatters", "broken into pieces",
+                         "broken glass", "pieces missing", "broken shards",
+                         "shards of glass", "glass shards", "missing pieces",
+                         "completely shattered", "shattered completely",
+                         "crumbling", "crumbled", "shattered pattern",
+                         "multiple broken", "glass falling", "glass broken off")
+
+# Backwards-compatible alias.
+_SHATTER_HINTS = _STRICT_SHATTER_HINTS
 
 # Trigger phrases that indicate the VLM saw a NON-deforming surface
 # mark (scratch, scrape, paint transfer) rather than a real dent.
