@@ -2,8 +2,8 @@
 
 A production-grade system that verifies damage-claim evidence for three object
 domains (`car`, `laptop`, `package`) using a single VLM call per claim plus a
-deterministic six-layer rule engine. The branch consolidates four months of
-iteration (June 2026) into the canonical, freeze-approved v8 submission.
+deterministic six-layer rule engine. The branch is the canonical,
+freeze-approved v8 submission produced at the end of the 24-hour hackathon.
 
 > **Final shipped branch:** `main` (post-freeze, post-overfitting-remediation,
 > post-placeholder-backfill). The active rules engine is
@@ -15,18 +15,18 @@ iteration (June 2026) into the canonical, freeze-approved v8 submission.
 
 ## Table of contents
 
-1. [Problem statement](#1-problem-statement)
-2. [Final architecture](#2-final-architecture)
-3. [Approach — how the canonical branch came together](#3-approach)
-4. [What failed, what worked, and why](#4-failures-wins-and-why)
-5. [The overfitting remediation pass (v7 → v8)](#5-remediation-pass)
-6. [Final submission freeze](#6-submission-freeze)
-7. [Reproducibility, environment, and AVIF handling](#7-reproducibility)
-8. [Repository layout](#8-repository-layout)
-9. [Quickstart](#9-quickstart)
-10. [Branches in this repository](#10-branches)
-11. [Known limitations](#11-known-limitations)
-12. [License & contact](#12-license)
+1. Problem statement
+2. Final architecture
+3. Approach — how the canonical branch came together
+4. What failed, what worked, and why
+5. The overfitting remediation pass (v7 → v8)
+6. Final submission freeze
+7. Reproducibility, environment, and AVIF handling
+8. Repository layout
+9. Quickstart
+10. Branches in this repository
+11. Known limitations
+12. License & contact
 
 ---
 
@@ -64,7 +64,7 @@ disciplines:
 3. **Output fields must be image-grounded.** `object_part`, `severity`,
    `claim_status` and `issue_type` are derived from images, not from text.
 
-Full task spec lives in [`problem_statement.md`](./problem_statement.md).
+Full task spec lives in `problem_statement.md`.
 
 ---
 
@@ -150,17 +150,17 @@ the final v8. The strategy was **explore widely, ship narrowly** — every
 experimental branch is preserved for traceability, but the canonical branch
 ships only the rubric-faithful engine.
 
-| Branch | Era | Headline result | Disposition |
-|---|---|---|---|
-| `main` (early) | day 1 | Starter template only | superseded |
-| `feature/baseline-pipeline` | week 1 | First end-to-end pipeline, 10% sample row acc | superseded |
-| `submission/v1` | week 1 | Baseline + reports + manifests | superseded |
-| `feature/qwen-modal` | week 2 | Live Qwen2.5-VL on Modal A10G; multi-crop experiments | kept for reference (rejected — worse than mimo-v2.5) |
-| `feature/hybrid-pipeline` | week 2 | Qwen observer + MIMO judge + verifier + router | kept for reference (rejected — no row-acc lift) |
-| `feature/eval-90pct` | week 3 | Phase-1.x rubric-faithful rule engine, 85% sample row acc | **promoted to main** |
-| `main` (post-freeze) | freeze | v8 with overfitting remediation, 65% sample row acc, counterfactually robust | **shipped** |
+| Branch | Headline result | Disposition |
+|---|---|---|
+| `main` (early) | Starter template only | superseded |
+| `feature/baseline-pipeline` | First end-to-end pipeline, 10% sample row acc | superseded |
+| `submission/v1` | Baseline + reports + manifests | superseded |
+| `feature/qwen-modal` | Live Qwen2.5-VL on Modal A10G; multi-crop experiments | kept for reference (rejected — worse than mimo-v2.5) |
+| `feature/hybrid-pipeline` | Qwen observer + MIMO judge + verifier + router | kept for reference (rejected — no row-acc lift) |
+| `feature/eval-90pct` | Phase-1.x rubric-faithful rule engine, 85% sample row acc | **promoted to main** |
+| `main` (post-freeze) | v8 with overfitting remediation, 65% sample row acc, counterfactually robust | **shipped** |
 
-### 3.1 Phase 0 — Baseline pipeline (week 1)
+### 3.1 Phase 0 — Baseline pipeline
 
 Built the first end-to-end pipeline in `feature/baseline-pipeline`:
 
@@ -173,32 +173,33 @@ Built the first end-to-end pipeline in `feature/baseline-pipeline`:
 approach cannot escape the 65% per-field ceiling because the VLM's
 classifications are not perfectly calibrated to the rubric's enums.
 
-### 3.2 Phase 1.x — Rubric-faithful rule engine (week 2 → week 3)
+### 3.2 Phase 1.x — Rubric-faithful rule engine
 
 In `feature/eval-90pct`, we replaced the loose `apply_rules` with a six-layer
 `apply_rules_v2` that captures the rubric:
 
-| Sub-phase | Commit | Change | Effect |
-|---|---|---|---|
-| Phase 1.0 | `bfd8fb1` | Off-line replay harness + 6-layer engine scaffold | +25pp |
-| Phase 1.1 | `809c6fa` | OpenCV image-quality module, v2 prompt, tuned thresholds | +15pp |
-| Phase 1.5 | `2ac0f51` | Expanded visibility/no-damage phrase lists, valid_image logic | +5pp |
-| Phase 1.6 | `8b9753b` | Targeted rule fixes for glass_shatter / water_damage / NEI risk_flags | +5pp |
-| Phase 1.7 | `8374182` | Gated cropped_or_obstructed, possible_manipulation; added manual_review_required from user_history; damage_not_visible for contradicted-no-damage | +10pp |
-| Phase 1.8 | `b3faeef` | Stricter shatter hints (removed `'radiating'` per rubric) | +5pp |
+| Sub-phase | Change | Effect |
+|---|---|---|
+| Phase 1.0 | Off-line replay harness + 6-layer engine scaffold | +25pp |
+| Phase 1.1 | OpenCV image-quality module, v2 prompt, tuned thresholds | +15pp |
+| Phase 1.5 | Expanded visibility/no-damage phrase lists, valid_image logic | +5pp |
+| Phase 1.6 | Targeted rule fixes for glass_shatter / water_damage / NEI risk_flags | +5pp |
+| Phase 1.7 | Gated cropped_or_obstructed, possible_manipulation; added manual_review_required from user_history; damage_not_visible for contradicted-no-damage | +10pp |
+| Phase 1.8 | Stricter shatter hints (removed `'radiating'` per rubric) | +5pp |
 
 **Final v7 result:** **85% (17/20)** sample row accuracy, every per-field
 ≥90%, no production-leakage detected.
 
 ### 3.3 Phase 2 — Overfitting audit and remediation
 
-See [§5](#5-remediation-pass) — the v7→v8 pass that traded 20 percentage
-points of sample row accuracy for counterfactual robustness.
+This is the v7→v8 pass that traded 20 percentage points of sample row
+accuracy for counterfactual robustness. Detailed in section 5 of this
+README.
 
 ### 3.4 Phase 3 — Submission freeze
 
-See [§6](#6-submission-freeze) — the seven-phase freeze that produced the
-shipped bundle.
+The seven-phase freeze that produced the shipped bundle. Detailed in
+section 6 of this README.
 
 ---
 
@@ -355,8 +356,8 @@ unreadable-images placeholder.
 
 ## 5. Remediation pass (v7 → v8)
 
-The full remediation report lives in [`REMEDIATION_REPORT.md`](./REMEDIATION_REPORT.md).
-This section summarizes.
+The full remediation report lives in `REMEDIATION_REPORT.md`. This section
+summarizes.
 
 ### 5.1 What was flagged
 
@@ -682,14 +683,14 @@ Expected: 10/10 scenarios pass.
 
 ## 10. Branches in this repository
 
-| Branch | Era | Status | Notes |
-|---|---|---|---|
-| `main` (post-freeze) | shipped | **canonical** | This branch. The shipped submission. |
-| `submission/v1` | week 1 | superseded | Baseline pipeline + manifests. |
-| `feature/baseline-pipeline` | week 1 | superseded | First end-to-end pipeline. |
-| `feature/eval-90pct` | week 3 | superseded | v7 → v8 remediations, freeze, backfill. Promoted into main. |
-| `feature/hybrid-pipeline` | week 2 | experimental | Qwen observer + MIMO judge + verifier. Rejected — no row-acc lift. Kept for reference. |
-| `feature/qwen-modal` | week 2 | experimental | Live Qwen2.5-VL on Modal. Rejected. Kept for reference. |
+| Branch | Status | Notes |
+|---|---|---|
+| `main` (post-freeze) | **canonical** | This branch. The shipped submission. |
+| `submission/v1` | superseded | Baseline pipeline + manifests. |
+| `feature/baseline-pipeline` | superseded | First end-to-end pipeline. |
+| `feature/eval-90pct` | superseded | v7 → v8 remediations, freeze, backfill. Promoted into main. |
+| `feature/hybrid-pipeline` | experimental | Qwen observer + MIMO judge + verifier. Rejected — no row-acc lift. Kept for reference. |
+| `feature/qwen-modal` | experimental | Live Qwen2.5-VL on Modal. Rejected. Kept for reference. |
 
 ---
 
@@ -699,7 +700,7 @@ Expected: 10/10 scenarios pass.
    the v7→v8 remediation traded sample row accuracy for
    counterfactual robustness. Three rows regressed (`user_005`,
    `user_020`, `user_034`) and one row gained (`user_034` citation
-   policy). See [§5.3](#53-sample-accuracy-impact).
+   policy). See section 5.3 of this README.
 2. **2 `object_part` errors are VLM-driven** (`user_005`,
    `user_008`). The rule engine cannot override the VLM's
    visible-part identification without reading the user claim text,
