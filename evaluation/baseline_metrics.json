@@ -1,0 +1,542 @@
+{
+  "total_rows": 20,
+  "row_accuracy": 0.1,
+  "per_field_accuracy": {
+    "evidence_standard_met": 0.4,
+    "risk_flags": 0.3,
+    "issue_type": 0.25,
+    "object_part": 0.45,
+    "claim_status": 0.35,
+    "supporting_image_ids": 0.4,
+    "valid_image": 0.9,
+    "severity": 0.2
+  },
+  "per_field_correct": {
+    "evidence_standard_met": 8,
+    "risk_flags": 6,
+    "issue_type": 5,
+    "object_part": 9,
+    "claim_status": 7,
+    "supporting_image_ids": 8,
+    "valid_image": 18,
+    "severity": 4
+  },
+  "per_field_total": {
+    "evidence_standard_met": 20,
+    "risk_flags": 20,
+    "issue_type": 20,
+    "object_part": 20,
+    "claim_status": 20,
+    "supporting_image_ids": 20,
+    "valid_image": 20,
+    "severity": 20
+  },
+  "row_errors": [
+    {
+      "index": 0,
+      "user_id": "user_001",
+      "claim_object": "car",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "false",
+          "ground_truth": "true"
+        },
+        "risk_flags": {
+          "predicted": "damage_not_visible",
+          "ground_truth": "none"
+        },
+        "issue_type": {
+          "predicted": "none",
+          "ground_truth": "dent"
+        },
+        "object_part": {
+          "predicted": "unknown",
+          "ground_truth": "rear_bumper"
+        },
+        "claim_status": {
+          "predicted": "not_enough_information",
+          "ground_truth": "supported"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_1"
+        },
+        "severity": {
+          "predicted": "none",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 1,
+      "user_id": "user_002",
+      "claim_object": "car",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "false",
+          "ground_truth": "true"
+        },
+        "risk_flags": {
+          "predicted": "damage_not_visible",
+          "ground_truth": "none"
+        },
+        "issue_type": {
+          "predicted": "none",
+          "ground_truth": "scratch"
+        },
+        "object_part": {
+          "predicted": "unknown",
+          "ground_truth": "front_bumper"
+        },
+        "claim_status": {
+          "predicted": "not_enough_information",
+          "ground_truth": "supported"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_1"
+        },
+        "severity": {
+          "predicted": "none",
+          "ground_truth": "low"
+        }
+      }
+    },
+    {
+      "index": 2,
+      "user_id": "user_004",
+      "claim_object": "car",
+      "differences": {
+        "severity": {
+          "predicted": "high",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 3,
+      "user_id": "user_007",
+      "claim_object": "car",
+      "differences": {
+        "issue_type": {
+          "predicted": "crack",
+          "ground_truth": "broken_part"
+        }
+      }
+    },
+    {
+      "index": 4,
+      "user_id": "user_005",
+      "claim_object": "car",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "false",
+          "ground_truth": "true"
+        },
+        "risk_flags": {
+          "predicted": "damage_not_visible;user_history_risk",
+          "ground_truth": "claim_mismatch;user_history_risk;manual_review_required"
+        },
+        "issue_type": {
+          "predicted": "none",
+          "ground_truth": "scratch"
+        },
+        "object_part": {
+          "predicted": "unknown",
+          "ground_truth": "rear_bumper"
+        },
+        "claim_status": {
+          "predicted": "not_enough_information",
+          "ground_truth": "contradicted"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_1"
+        },
+        "severity": {
+          "predicted": "none",
+          "ground_truth": "low"
+        }
+      }
+    },
+    {
+      "index": 5,
+      "user_id": "user_006",
+      "claim_object": "car",
+      "differences": {
+        "risk_flags": {
+          "predicted": "damage_not_visible",
+          "ground_truth": "wrong_angle;damage_not_visible"
+        },
+        "issue_type": {
+          "predicted": "none",
+          "ground_truth": "unknown"
+        },
+        "object_part": {
+          "predicted": "unknown",
+          "ground_truth": "headlight"
+        },
+        "severity": {
+          "predicted": "none",
+          "ground_truth": "unknown"
+        }
+      }
+    },
+    {
+      "index": 7,
+      "user_id": "user_008",
+      "claim_object": "car",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "false",
+          "ground_truth": "true"
+        },
+        "risk_flags": {
+          "predicted": "damage_not_visible;user_history_risk",
+          "ground_truth": "claim_mismatch;non_original_image;user_history_risk;manual_review_required"
+        },
+        "issue_type": {
+          "predicted": "none",
+          "ground_truth": "broken_part"
+        },
+        "object_part": {
+          "predicted": "unknown",
+          "ground_truth": "front_bumper"
+        },
+        "claim_status": {
+          "predicted": "not_enough_information",
+          "ground_truth": "contradicted"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_1"
+        },
+        "valid_image": {
+          "predicted": "true",
+          "ground_truth": "false"
+        },
+        "severity": {
+          "predicted": "none",
+          "ground_truth": "high"
+        }
+      }
+    },
+    {
+      "index": 8,
+      "user_id": "user_009",
+      "claim_object": "laptop",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "false",
+          "ground_truth": "true"
+        },
+        "risk_flags": {
+          "predicted": "damage_not_visible",
+          "ground_truth": "none"
+        },
+        "issue_type": {
+          "predicted": "none",
+          "ground_truth": "crack"
+        },
+        "object_part": {
+          "predicted": "unknown",
+          "ground_truth": "screen"
+        },
+        "claim_status": {
+          "predicted": "not_enough_information",
+          "ground_truth": "supported"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_1"
+        },
+        "severity": {
+          "predicted": "none",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 9,
+      "user_id": "user_010",
+      "claim_object": "laptop",
+      "differences": {
+        "severity": {
+          "predicted": "high",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 10,
+      "user_id": "user_011",
+      "claim_object": "laptop",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "false",
+          "ground_truth": "true"
+        },
+        "risk_flags": {
+          "predicted": "damage_not_visible",
+          "ground_truth": "none"
+        },
+        "issue_type": {
+          "predicted": "none",
+          "ground_truth": "stain"
+        },
+        "object_part": {
+          "predicted": "unknown",
+          "ground_truth": "keyboard"
+        },
+        "claim_status": {
+          "predicted": "not_enough_information",
+          "ground_truth": "supported"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_1"
+        },
+        "severity": {
+          "predicted": "none",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 11,
+      "user_id": "user_012",
+      "claim_object": "laptop",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "false",
+          "ground_truth": "true"
+        },
+        "risk_flags": {
+          "predicted": "damage_not_visible",
+          "ground_truth": "none"
+        },
+        "issue_type": {
+          "predicted": "none",
+          "ground_truth": "dent"
+        },
+        "object_part": {
+          "predicted": "unknown",
+          "ground_truth": "corner"
+        },
+        "claim_status": {
+          "predicted": "not_enough_information",
+          "ground_truth": "supported"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_2"
+        },
+        "severity": {
+          "predicted": "none",
+          "ground_truth": "low"
+        }
+      }
+    },
+    {
+      "index": 12,
+      "user_id": "user_018",
+      "claim_object": "laptop",
+      "differences": {
+        "issue_type": {
+          "predicted": "glass_shatter",
+          "ground_truth": "crack"
+        },
+        "severity": {
+          "predicted": "high",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 13,
+      "user_id": "user_020",
+      "claim_object": "laptop",
+      "differences": {
+        "risk_flags": {
+          "predicted": "user_history_risk",
+          "ground_truth": "damage_not_visible;user_history_risk;manual_review_required"
+        },
+        "issue_type": {
+          "predicted": "scratch",
+          "ground_truth": "none"
+        },
+        "claim_status": {
+          "predicted": "supported",
+          "ground_truth": "contradicted"
+        },
+        "severity": {
+          "predicted": "low",
+          "ground_truth": "none"
+        }
+      }
+    },
+    {
+      "index": 15,
+      "user_id": "user_030",
+      "claim_object": "package",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "false",
+          "ground_truth": "true"
+        },
+        "risk_flags": {
+          "predicted": "damage_not_visible",
+          "ground_truth": "none"
+        },
+        "issue_type": {
+          "predicted": "none",
+          "ground_truth": "torn_packaging"
+        },
+        "object_part": {
+          "predicted": "unknown",
+          "ground_truth": "seal"
+        },
+        "claim_status": {
+          "predicted": "not_enough_information",
+          "ground_truth": "supported"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_1"
+        },
+        "severity": {
+          "predicted": "none",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 16,
+      "user_id": "user_031",
+      "claim_object": "package",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "false",
+          "ground_truth": "true"
+        },
+        "risk_flags": {
+          "predicted": "damage_not_visible;user_history_risk",
+          "ground_truth": "user_history_risk;manual_review_required"
+        },
+        "issue_type": {
+          "predicted": "none",
+          "ground_truth": "water_damage"
+        },
+        "object_part": {
+          "predicted": "unknown",
+          "ground_truth": "package_side"
+        },
+        "claim_status": {
+          "predicted": "not_enough_information",
+          "ground_truth": "supported"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_1"
+        },
+        "severity": {
+          "predicted": "none",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 17,
+      "user_id": "user_032",
+      "claim_object": "package",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "true",
+          "ground_truth": "false"
+        },
+        "risk_flags": {
+          "predicted": "manual_review_required",
+          "ground_truth": "cropped_or_obstructed;damage_not_visible;manual_review_required"
+        },
+        "issue_type": {
+          "predicted": "missing_part",
+          "ground_truth": "unknown"
+        },
+        "claim_status": {
+          "predicted": "supported",
+          "ground_truth": "not_enough_information"
+        },
+        "supporting_image_ids": {
+          "predicted": "img_1",
+          "ground_truth": "none"
+        },
+        "valid_image": {
+          "predicted": "true",
+          "ground_truth": "false"
+        },
+        "severity": {
+          "predicted": "high",
+          "ground_truth": "unknown"
+        }
+      }
+    },
+    {
+      "index": 18,
+      "user_id": "user_033",
+      "claim_object": "package",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "false",
+          "ground_truth": "true"
+        },
+        "risk_flags": {
+          "predicted": "damage_not_visible;user_history_risk",
+          "ground_truth": "wrong_object;claim_mismatch;user_history_risk;manual_review_required"
+        },
+        "issue_type": {
+          "predicted": "none",
+          "ground_truth": "unknown"
+        },
+        "claim_status": {
+          "predicted": "not_enough_information",
+          "ground_truth": "contradicted"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_1"
+        },
+        "severity": {
+          "predicted": "none",
+          "ground_truth": "low"
+        }
+      }
+    },
+    {
+      "index": 19,
+      "user_id": "user_034",
+      "claim_object": "package",
+      "differences": {
+        "evidence_standard_met": {
+          "predicted": "false",
+          "ground_truth": "true"
+        },
+        "risk_flags": {
+          "predicted": "damage_not_visible;user_history_risk",
+          "ground_truth": "damage_not_visible;text_instruction_present;user_history_risk;manual_review_required"
+        },
+        "object_part": {
+          "predicted": "unknown",
+          "ground_truth": "seal"
+        },
+        "claim_status": {
+          "predicted": "not_enough_information",
+          "ground_truth": "contradicted"
+        },
+        "supporting_image_ids": {
+          "predicted": "none",
+          "ground_truth": "img_1;img_2"
+        }
+      }
+    }
+  ]
+}

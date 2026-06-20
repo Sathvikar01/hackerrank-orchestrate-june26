@@ -1,0 +1,229 @@
+{
+  "test_a_history_risk_randomised": {
+    "rows_tested": 20,
+    "decisional_violations": [],
+    "supporting_image_violations": [],
+    "risk_flag_legitimate_changes": [
+      {
+        "user_id": "user_002",
+        "tag": "history_risk_on",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_004",
+        "tag": "history_risk_on",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_005",
+        "tag": "history_risk_off",
+        "added": [],
+        "removed": [
+          "user_history_risk"
+        ]
+      },
+      {
+        "user_id": "user_006",
+        "tag": "history_risk_on",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_008",
+        "tag": "history_risk_off",
+        "added": [],
+        "removed": [
+          "user_history_risk"
+        ]
+      },
+      {
+        "user_id": "user_009",
+        "tag": "history_risk_on",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_011",
+        "tag": "history_risk_on",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_012",
+        "tag": "history_risk_on",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_015",
+        "tag": "history_risk_on",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_030",
+        "tag": "history_risk_on",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_031",
+        "tag": "history_risk_off",
+        "added": [],
+        "removed": [
+          "manual_review_required",
+          "user_history_risk"
+        ]
+      },
+      {
+        "user_id": "user_034",
+        "tag": "history_risk_off",
+        "added": [],
+        "removed": [
+          "user_history_risk"
+        ]
+      }
+    ],
+    "risk_flag_illegitimate_changes": []
+  },
+  "test_b_user_id_shuffled": {
+    "rows_tested": 20,
+    "decisional_violations": [],
+    "supporting_image_violations": [],
+    "risk_flag_legitimate_changes": [
+      {
+        "user_id": "user_002",
+        "surrogate_uid": "user_024",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_005",
+        "surrogate_uid": "user_022",
+        "added": [],
+        "removed": [
+          "user_history_risk"
+        ]
+      },
+      {
+        "user_id": "user_003",
+        "surrogate_uid": "user_031",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_009",
+        "surrogate_uid": "user_013",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_011",
+        "surrogate_uid": "user_036",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_012",
+        "surrogate_uid": "user_005",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_018",
+        "surrogate_uid": "user_043",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_030",
+        "surrogate_uid": "user_034",
+        "added": [
+          "manual_review_required",
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_031",
+        "surrogate_uid": "user_029",
+        "added": [],
+        "removed": [
+          "manual_review_required",
+          "user_history_risk"
+        ]
+      },
+      {
+        "user_id": "user_032",
+        "surrogate_uid": "user_047",
+        "added": [
+          "user_history_risk"
+        ],
+        "removed": []
+      },
+      {
+        "user_id": "user_033",
+        "surrogate_uid": "user_019",
+        "added": [],
+        "removed": [
+          "user_history_risk"
+        ]
+      },
+      {
+        "user_id": "user_034",
+        "surrogate_uid": "user_032",
+        "added": [],
+        "removed": [
+          "user_history_risk"
+        ]
+      }
+    ],
+    "risk_flag_illegitimate_changes": []
+  },
+  "cache_misses": [],
+  "overall_pass": true
+}

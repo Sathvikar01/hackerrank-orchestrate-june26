@@ -1,0 +1,37 @@
+{
+  "row_accuracy": 0.4,
+  "per_field_accuracy": {
+    "evidence_standard_met": 0.85,
+    "risk_flags": 0.6,
+    "issue_type": 0.5,
+    "object_part": 0.85,
+    "claim_status": 0.8,
+    "supporting_image_ids": 0.7,
+    "valid_image": 0.85,
+    "severity": 0.6
+  },
+  "per_field_correct": {
+    "evidence_standard_met": 17,
+    "risk_flags": 12,
+    "issue_type": 10,
+    "object_part": 17,
+    "claim_status": 16,
+    "supporting_image_ids": 14,
+    "valid_image": 17,
+    "severity": 12
+  },
+  "per_field_total": {
+    "evidence_standard_met": 20,
+    "risk_flags": 20,
+    "issue_type": 20,
+    "object_part": 20,
+    "claim_status": 20,
+    "supporting_image_ids": 20,
+    "valid_image": 20,
+    "severity": 20
+  },
+  "model": "meta/llama-4-maverick-17b-128e-instruct",
+  "prompt_version": "v3-llama-4-maverick-17b-128e-instruct",
+  "total_time_seconds": 91.54841089248657,
+  "total_rows": 20
+}

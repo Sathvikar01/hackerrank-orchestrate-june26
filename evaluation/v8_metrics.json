@@ -1,0 +1,157 @@
+{
+  "total_rows": 20,
+  "row_accuracy": 0.65,
+  "per_field_accuracy": {
+    "evidence_standard_met": 1.0,
+    "risk_flags": 0.85,
+    "issue_type": 0.8,
+    "object_part": 0.75,
+    "claim_status": 0.9,
+    "supporting_image_ids": 0.95,
+    "valid_image": 1.0,
+    "severity": 0.85
+  },
+  "per_field_correct": {
+    "evidence_standard_met": 20,
+    "risk_flags": 17,
+    "issue_type": 16,
+    "object_part": 15,
+    "claim_status": 18,
+    "supporting_image_ids": 19,
+    "valid_image": 20,
+    "severity": 17
+  },
+  "per_field_total": {
+    "evidence_standard_met": 20,
+    "risk_flags": 20,
+    "issue_type": 20,
+    "object_part": 20,
+    "claim_status": 20,
+    "supporting_image_ids": 20,
+    "valid_image": 20,
+    "severity": 20
+  },
+  "row_errors": [
+    {
+      "index": 0,
+      "user_id": "user_001",
+      "claim_object": "car",
+      "differences": {
+        "issue_type": {
+          "predicted": "missing_part",
+          "ground_truth": "dent"
+        },
+        "severity": {
+          "predicted": "high",
+          "ground_truth": "medium"
+        }
+      }
+    },
+    {
+      "index": 4,
+      "user_id": "user_005",
+      "claim_object": "car",
+      "differences": {
+        "issue_type": {
+          "predicted": "dent",
+          "ground_truth": "scratch"
+        },
+        "object_part": {
+          "predicted": "quarter_panel",
+          "ground_truth": "rear_bumper"
+        }
+      }
+    },
+    {
+      "index": 7,
+      "user_id": "user_008",
+      "claim_object": "car",
+      "differences": {
+        "object_part": {
+          "predicted": "hood",
+          "ground_truth": "front_bumper"
+        }
+      }
+    },
+    {
+      "index": 13,
+      "user_id": "user_020",
+      "claim_object": "laptop",
+      "differences": {
+        "risk_flags": {
+          "predicted": "manual_review_required;user_history_risk",
+          "ground_truth": "damage_not_visible;user_history_risk;manual_review_required"
+        },
+        "issue_type": {
+          "predicted": "dent",
+          "ground_truth": "none"
+        },
+        "object_part": {
+          "predicted": "base",
+          "ground_truth": "trackpad"
+        },
+        "claim_status": {
+          "predicted": "supported",
+          "ground_truth": "contradicted"
+        },
+        "severity": {
+          "predicted": "medium",
+          "ground_truth": "none"
+        }
+      }
+    },
+    {
+      "index": 17,
+      "user_id": "user_032",
+      "claim_object": "package",
+      "differences": {
+        "risk_flags": {
+          "predicted": "damage_not_visible;manual_review_required",
+          "ground_truth": "cropped_or_obstructed;damage_not_visible;manual_review_required"
+        },
+        "object_part": {
+          "predicted": "item",
+          "ground_truth": "contents"
+        }
+      }
+    },
+    {
+      "index": 18,
+      "user_id": "user_033",
+      "claim_object": "package",
+      "differences": {
+        "object_part": {
+          "predicted": "box",
+          "ground_truth": "unknown"
+        }
+      }
+    },
+    {
+      "index": 19,
+      "user_id": "user_034",
+      "claim_object": "package",
+      "differences": {
+        "risk_flags": {
+          "predicted": "manual_review_required;text_instruction_present;user_history_risk",
+          "ground_truth": "damage_not_visible;text_instruction_present;user_history_risk;manual_review_required"
+        },
+        "issue_type": {
+          "predicted": "torn_packaging",
+          "ground_truth": "none"
+        },
+        "claim_status": {
+          "predicted": "supported",
+          "ground_truth": "contradicted"
+        },
+        "supporting_image_ids": {
+          "predicted": "img_1",
+          "ground_truth": "img_1;img_2"
+        },
+        "severity": {
+          "predicted": "medium",
+          "ground_truth": "none"
+        }
+      }
+    }
+  ]
+}
