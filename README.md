@@ -26,7 +26,8 @@ freeze-approved v8 submission produced at the end of the 24-hour hackathon.
 9. Quickstart
 10. Branches in this repository
 11. Known limitations
-12. License & contact
+12. Future implementations
+13. License & contact
 
 ---
 
@@ -717,7 +718,104 @@ Expected: 10/10 scenarios pass.
 
 ---
 
-## 12. License & contact
+## 12. Future implementations
+
+The shipped v8 submission trades sample row accuracy for hidden-test
+robustness. Below is a prioritised roadmap of changes that could lift
+both sample row accuracy **and** hidden-test generalisation. Each item
+names the expected delta, the failure mode it fixes, and the cost.
+
+### 12.1 Vision model upgrades
+
+| Priority | Change | Expected Δ | Notes |
+|---|---|---|---|
+| **P0** | Upgrade to `mimo-v2.5-pro` (already in `.env`, currently unused) | +5-10pp on `claim_status` and `issue_type` | The `-pro` variant has stricter JSON adherence and lower hallucination rate. Currently `PRIMARY_VLM_MODEL=mimo-v2.5`; flipping the env var to `mimo-v2.5-pro` is a one-line change. Cost: 1.3× latency, 2× cost. |
+| **P1** | Add an ensemble fallback: call `mimo-v2.5` and `mimo-v2.5-pro`; trust the pro answer on disagreement | +3-5pp on `claim_status` when models disagree | The previous verifier experiment (`feature/hybrid-pipeline`) failed because the verifier was a separate prompt, not a separate model. With two independent model families, the disagreement signal is meaningful. |
+| **P2** | Try GPT-4o or Claude Sonnet 4.5 as a third reviewer for low-confidence cases | +2-4pp on `object_part` and `claim_status` | Cost-prohibitive at scale but useful as a tie-breaker for rows where `apply_rules_v2` returns `not_enough_information` despite concrete visible issues. Route only the bottom-decile confidence rows. |
+| **P3** | Try `Qwen2.5-VL-72B-Instruct` again with a calibrated, rubric-anchored prompt (not the bare decision-tree prompt that was rejected) | unknown | The original Qwen run used an in-prompt decision tree that fought the model. A plain rubric-anchored prompt might surface Qwen's stronger object-detection capability on `object_part`. |
+
+### 12.2 Prompt engineering
+
+| Priority | Change | Expected Δ | Notes |
+|---|---|---|---|
+| **P0** | Per-object custom prompts (one each for `car`, `laptop`, `package`) | +3-7pp on `issue_type` and `object_part` | The current `prompts.py` uses a single generic prompt. Domain-specific object_part lists and example damages per object would tighten VLM output. |
+| **P0** | Add 2-3 few-shot examples per object type, drawn from the rubric-aligned sample | +2-4pp on `claim_status` | The `v2` prompt was rejected for being too verbose, but a *single* calibrated example per class is usually a net win. |
+| **P1** | Add a JSON schema in the prompt and request `response_format={"type":"json_schema", ...}` with strict mode | +2pp on `issue_type` (fewer parse failures) | The current prompt asks for JSON but doesn't enforce schema. The replay pipeline has a `parse_json_from_text` fallback for malformed output, but every fallback is a missed opportunity. |
+| **P2** | Multilingual claim translation: claims come in Hindi, Spanish, English (see `user_002`, `user_008`). Run a small translation pass before the VLM call | +1-3pp on `user_claim`-sensitive fields | Currently the VLM handles mixed-language prompts natively, but the per-field accuracy drops on non-English claims. A pre-translation step would standardise. |
+| **P3** | Chain-of-thought reasoning step: ask the VLM to (1) describe the image, (2) name visible issues, (3) compare to claim, (4) decide | +1-2pp on `claim_status` | Risky: long chains hit the `max_tokens=8192` ceiling and add latency. Only attempt if other improvements plateau. |
+
+### 12.3 Image preprocessing
+
+| Priority | Change | Expected Δ | Notes |
+|---|---|---|---|
+| **P0** | Auto-convert AVIF/HEIC/HEIF/WEBP to JPEG at ingest, before the rule engine sees them | removes all placeholder fall-throughs | Currently `pillow-avif-plugin` decodes AVIF in-process; HEIC/HEIF still fail silently. A one-line pre-conversion step using `Pillow` (with `pillow-heif` plugin) would unify all formats. |
+| **P1** | Object-detection crop: run a small DETR/YOLO model on each image to localise the damaged part before the VLM call | +3-5pp on `object_part` | The current `object_part` errors (`user_005`, `user_008`) are VLM misidentifications of which part is shown. A detector that crops to the part would help. Cost: ~50ms/image. |
+| **P1** | Multi-crop with smart aggregation (revisit the failed experiment) | +2-3pp on `object_part`, -1-2pp on `claim_status` | The v7 multi-crop experiment failed because each crop's verdict was over-confident. Aggregation should only fire when all crops agree; disagreement should fall through to NEI. |
+| **P2** | Image-quality triage: discard images with OpenCV-detected blur < threshold **before** the VLM call | -5-10% cost, +0-1pp accuracy | Currently blurry images still cost a VLM call. Rejecting them upstream is a free win on cost and a marginal accuracy win. |
+
+### 12.4 Rule-engine refinements
+
+| Priority | Change | Expected Δ | Notes |
+|---|---|---|---|
+| **P0** | Two-pass `object_part`: first pass reads `object_part` from VLM; second pass reads `user_claim` and picks the *claimed* part from a known enum, only if the VLM's `object_part=unknown` | +5-10pp on `object_part` | The current 2 VLM-driven errors (`user_005`, `user_008`) are caused by VLM picking the wrong part. Reading the claim text and matching against the enum is a rule-engine fix. Needs an `object_part_extractor` step before the VLM call. |
+| **P1** | Add `_RESIDUE_HINTS` for water_damage vs stain discrimination | +1-2pp on `issue_type` for package claims | The current water_damage → stain gate (Layer 3) is a phrase list. A small ML classifier trained on the labelled sample could replace the phrase list with a calibrated probability. |
+| **P2** | Per-object severity calibration | +2-4pp on `severity` | The current severity map is hand-tuned per `issue_type`. A per-object-per-issue regression model trained on the labelled sample would generalise better. |
+| **P3** | Confidence score on every decision | enables downstream routing | None of the current 10 output fields carry a confidence value. Adding `confidence_*` fields (one per output) would let the verifier / ensemble / fallback layers reason about uncertainty. |
+
+### 12.5 Data and evaluation
+
+| Priority | Change | Expected Δ | Notes |
+|---|---|---|---|
+| **P0** | Expand the labelled sample from 20 to ~200 rows by hand-labelling the test set | enables statistically meaningful per-field accuracy | The 20-row sample has wide confidence intervals. A 200-row sample would let us distinguish 65% ± 5% from 70% ± 3%. |
+| **P1** | Add per-confidence-band accuracy and confusion-matrix plots | diagnostic, not a direct gain | The current `evaluation/main.py` reports only flat accuracy. Confusion matrices would reveal which (issue_type, object_part) pairs are systematically confused. |
+| **P2** | Synthetic data generation for under-represented classes | +2-3pp on rare `issue_type` × `object_part` combinations | The sample has 1 example each of `water_damage / laptop`, `missing_part / package`, `torn_packaging / package`. A diffusion model could generate more examples for rare combinations. |
+| **P3** | Active-learning loop on low-confidence rows | +5pp on the long tail | Once confidence scores are added, route low-confidence rows to a human reviewer and retrain the rule engine on the corrected labels. |
+
+### 12.6 Engineering improvements
+
+| Priority | Change | Expected Δ | Notes |
+|---|---|---|---|
+| **P0** | CI gate: run `analysis/counterfactual_harness.py` on every PR | prevents future regressions | The counterfactual harness is the single best guard against overfitting. Wire it into `.github/workflows/ci.yml`. |
+| **P1** | Schema validator as a pre-commit hook | prevents malformed outputs | A `jsonschema` validator against `OUTPUT_COLUMNS` would catch enum mismatches before they hit `output.csv`. |
+| **P1** | Parallel VLM calls (asyncio + `AsyncOpenAI`) | -50% wall-clock time on the full 44-row run | Each row currently serialised. The `openai>=1.0` SDK supports async natively. |
+| **P2** | Streaming output: write `output.csv` row-by-row as VLM responses land | -90% tail latency on partial-failure recovery | Currently a single failed row blocks the entire batch. |
+| **P3** | Container image (`Dockerfile`) with pinned Python 3.11 and OS-level AVIF/HEIF libraries | removes the `pillow-avif-plugin` install step | `pip install` in a slim image works but is fragile. A container with `libheif` baked in is more portable. |
+
+### 12.7 What's already been tried and rejected
+
+Do **not** re-attempt these without a fundamentally different approach:
+
+* **v3 prompt with explicit decision tree** — section 4.1 of this README.
+  Strictly worse than v1.
+* **Qwen2.5-VL-72B-Instruct on Modal as primary VLM** — section 4.2.
+  ≤55% row accuracy across all configurations.
+* **Qwen observer + MIMO judge verifier pattern** — section 4.2. Verifier
+  introduced ±3pp variance and never lifted row accuracy.
+* **`dent → scratch` on "absence of deformation language"** — section 4.4.
+  Absence is not causation. Reverted in v8.
+* **`contradicted` citation gated on `text_instruction_present +
+  user_history_risk`** — section 4.5. Widened in v8 to all contradicted
+  rows.
+
+### 12.8 Recommended execution order
+
+If we had another 24 hours:
+
+1. Flip `PRIMARY_VLM_MODEL` to `mimo-v2.5-pro` (one-line change, biggest
+   single-engine lift).
+2. Add per-object prompts with 2 few-shot examples each.
+3. Add HEIC support via `pillow-heif` so all 44 rows decode natively.
+4. Run a second pass on `object_part` against the parsed `user_claim`
+   text.
+5. Wire `analysis/counterfactual_harness.py` into CI as a required
+   check.
+
+Estimated combined delta: **+10-15pp on sample row accuracy**, with
+hidden-test robustness preserved (counterfactual harness still passes).
+
+---
+
+## 13. License & contact
 
 This is a HackerRank Orchestrate (June 2026) hackathon submission. The
 canonical branch is `main`. The active rules engine is
