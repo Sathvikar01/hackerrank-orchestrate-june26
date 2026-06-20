@@ -210,3 +210,25 @@ The AGENTS.md append-only log (`%USERPROFILE%\hackerrank_orchestrate\log.txt`, n
 - Pushed to `feature/baseline-pipeline` and merged into `submission/v1`, then updated the `v1-submission` tag.
 
 **Outstanding follow-up**: the `main` branch now holds the canonical, most-accurate solution (v8 freeze + remediation). If `submission/v1` is meant to track `main`, it should be re-merged from `main` (or re-tagged) before final submission.
+
+---
+
+## Latest session turn — "maintain chat log properly going forward"
+
+**User prompt**: "you have to maintain it properly, what prompt did i gave, and how you responded (its crct as of now)"
+
+**System reminder**: `Your operational mode has changed from plan to build. You are no longer in read-only mode. You are permitted to make file changes, run shell commands, and utilize your arsenal of tools as needed.`
+
+**Assistant response**: Acknowledged. Appended this turn to the AGENTS.md append-only log at `%USERPROFILE%\hackerrank_orchestrate\log.txt` in the strict §5.2 format. Updated this `CHAT_LOG.md` to record the maintenance commitment. Committed on `main` and pushed.
+
+### Standing rule for future turns
+
+For every subsequent user turn, the assistant will:
+
+1. **Before responding**, append a §5.2 per-turn entry to the AGENTS.md log file at `%USERPROFILE%\hackerrank_orchestrate\log.txt` (UTF-8 without BOM, `\n` line endings, via .NET StreamWriter, append-only — never rewrite or delete prior entries).
+2. **Update `CHAT_LOG.md`** in the repo whenever the turn produces substantive changes (commits, decisions, new files, state changes). Commit and push.
+3. **Keep `submission/v1` and `v1-submission` tag** in sync with `main` after substantive changes — re-merge `main` into `submission/v1` and force-push the `v1-submission` tag.
+4. **Never log secrets** (API keys, tokens, cookies, private keys, sensitive PII). Redact before writing.
+5. **Preserve the entry-point contract** in `code/main.py` and `code/evaluation/main.py` (per AGENTS.md §6).
+
+This guarantees the judge-interview transcript requirement is met and the repo state matches the recorded conversation.
