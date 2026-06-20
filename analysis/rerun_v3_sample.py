@@ -57,6 +57,17 @@ ANALYSIS_DIR = REPO_ROOT / "analysis"
 OUT_CSV = ANALYSIS_DIR / "replay_v3_sample.csv"
 OUT_METRICS = ANALYSIS_DIR / "v3_sample_metrics.json"
 
+# Load .env with override=True so real API keys in .env replace any stale
+# shell-level values (e.g. "dummy" set by a previous run). Must run BEFORE
+# any code.* import so code.config sees the real keys.
+try:
+    from dotenv import load_dotenv
+    _env_path = REPO_ROOT / ".env"
+    if _env_path.exists():
+        load_dotenv(_env_path, override=True)
+except Exception:
+    pass
+
 os.environ.setdefault("NVIDIA_API_KEY", "dummy-rerun-v3")
 os.environ.setdefault("MIMO_API_KEY", "dummy-rerun-v3")
 sys.path.insert(0, str(CODE_DIR))

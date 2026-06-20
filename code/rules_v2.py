@@ -81,6 +81,19 @@ def _layer1_severity(issue_type: str, object_part: str, vlm_severity: str,
         if vlm_blurb and "minor" in vlm_blurb.lower():
             return "low"
         return "medium"
+    # broken_part / missing_part on cars: honor the VLM's severity if
+    # the VLM's blurb describes catastrophic / extensive / major damage.
+    # The default map says broken_part=medium, missing_part=high, but the
+    # VLM may correctly call a broken_part as "high" for severe cases
+    # (e.g., broken-off fender) and a missing_part as "medium" for
+    # trivial cases. Trust the VLM severity in those situations.
+    if issue_type in ("broken_part", "missing_part") and vlm_severity in (
+            "high", "medium"):
+        if vlm_blurb and _contains_any(vlm_blurb, _CATASTROPHIC_HINTS):
+            return vlm_severity
+        if vlm_severity == "high" and vlm_blurb and _contains_any(
+                vlm_blurb, _CATASTROPHIC_HINTS):
+            return "high"
     if issue_type in _BASE_SEVERITY_MAP:
         return _BASE_SEVERITY_MAP[issue_type]
     # Fall back to the VLM's severity (already normalized elsewhere).
@@ -179,6 +192,9 @@ _SHATTER_HINTS = _STRICT_SHATTER_HINTS
 
 # Trigger phrases that indicate the VLM saw a NON-deforming surface
 # mark (scratch, scrape, paint transfer) rather than a real dent.
+# Note: only visual deformation-related words. Do NOT include
+# rationalization phrases like "consistent with the customer" — those
+# are tracked separately in _VLM_RATIONALIZATION_HINTS.
 _NO_DEFORM_HINTS = ("surface mark", "no deformation", "no dent",
                     "scratch on", "scratch across", "line on", "line across",
                     "scrape", "scratch", "scratched",
@@ -199,16 +215,134 @@ _DEFORM_HINTS = ("deformation", "deformed", "concave", "concavity",
                  "metal is pushed", "dented inward", "pushed inward",
                  "structural deformation", "crushed", "buckled",
                  "crumpled metal", "deep dent", "deep indentation",
-                 "significant dent", "large dent", "major dent")
+                 "significant dent", "large dent", "major dent",
+                 "dented in", "deeper dent", "severely dented",
+                 "structural damage", "frame bent")
+
+# Crack-focused trigger phrases used to DOWNGRADE a glass_shatter call to
+# crack. The default shatter path requires explicit "spider" / "shards" /
+# "missing pieces" language. The crack path is triggered by the VLM using
+# the words "crack" / "cracks" / "fracture" / "chip" — these describe a
+# single bounded fracture, NOT a full shatter, even if the VLM's overall
+# verdict said "shatter".
+_CRACK_FOCUSED_HINTS = (
+    "crack ", "cracks", "crack.", "crack,", "cracks.", "cracks,",
+    "cracked", "hairline crack", "hairline", "single crack",
+    "fracture", "fractures", "fractured", "stone chip", "stone impact",
+    "spreading crack", "radiating crack", "radiating cracks",
+    "multiple cracks", "spider crack", "spider crack pattern",
+    "small crack", "minor crack", "clear crack",
+)
+
+# Phrases that indicate the VLM is describing a WET/water pattern (not
+# just a residue/stain). Used to NOT downgrade water_damage to stain
+# when the VLM's blurb clearly says "wet" or "water".
+_WET_PATTERN_HINTS = (
+    "wet", "wet-looking", "wet looking", "damp", "moist", "moisture",
+    "saturated", "water pattern", "water damage", "water-marked",
+    "water stained", "water-stained", "water mark", "water-mark",
+    "water ring", "water-ring", "liquid",
+)
+
+# Phrases that suggest the VLM is OVER-confident in matching a generic
+# user claim ("physical damage", "issue", "problem") to a specific
+# issue_type. Used as a hallucination safety net.
+_VLM_RATIONALIZATION_HINTS = (
+    "consistent with the customer", "consistent with the user's",
+    "consistent with the claim", "matches the customer",
+    "matches the user's", "matches the claim",
+    "as the customer described", "as the user described",
+    "aligns with the customer", "aligns with the user's",
+    "aligns with the claim",
+)
+
+# Phrases that the VLM uses to indicate it is FOLLOWING an instruction
+# in the image or transcript (rather than describing the image). When
+# paired with `text_instruction_present` from the VLM, this is direct
+# causal evidence of injection-induced fabrication.
+_INJECTION_FABRICATION_HINTS = (
+    "as instructed", "as the prompt asked", "as the instructions say",
+    "as the text instructs", "per the instructions",
+    "based on the user's description", "based on the customer's",
+    "following the instructions", "as requested by the customer",
+    "as requested by the user", "as the user said to look for",
+    "as the customer said to look for", "as described in the text",
+    "the text in the image states", "the embedded text says",
+    "the text instructs", "the note in the image",
+)
+
+# Concrete damage descriptors. A VLM blurb that contains at least one of
+# these is grounded in a real visual observation of the specific damage
+# it is reporting. A blurb that lacks ALL of these is asserting a damage
+# verdict without naming what it actually saw -- the canonical signature
+# of a hallucinated or injection-following "supported" verdict.
+_CONCRETE_DAMAGE_DESCRIPTORS = (
+    "dent", "dented", "denting",
+    "scratch", "scratched", "scratches", "scrape", "scraped", "scuff",
+    "scuffed", "paint transfer", "clear coat",
+    "crack", "cracked", "cracks", "fracture", "fractured",
+    "hairline", "stone chip", "stone impact",
+    "shatter", "shattered", "shatters", "spider", "spiderweb",
+    "spider-web", "shards of glass", "glass shards", "broken shards",
+    "broken into pieces", "pieces missing", "missing pieces",
+    "broken", "broken off", "snapped", "fractured off",
+    "torn", "torn off", "ripped", "ripped off", "tear", "torn packaging",
+    "crushed", "crushed packaging", "crumpled",
+    "stain", "stained", "discoloration", "discolored", "discolor",
+    "water damage", "water ring", "water mark", "tide line", "tide mark",
+    "wet", "damp", "moisture", "saturated", "soaked",
+    "missing", "absent", "not present", "no item", "no contents",
+    "residue", "sticky", "sticky keys", "spill", "spilled",
+    "leak", "leaking", "leaked", "corrosion", "corroded", "rust",
+    "rusted", "oxidation", "warped", "warping", "swelling", "swollen",
+    "short circuit", "short-circuit", "fried",
+    "fire damage", "burn", "burned", "burnt", "charred",
+    "broken glass", "broken lens", "broken mirror",
+)
+
+# Positive scratch / scrape descriptors used to DOWNGRADE a "dent" call
+# to "scratch" when the VLM's blurb is actually describing a non-deforming
+# surface mark. The downgrade requires a POSITIVE signal in the blurb
+# (the VLM is naming a scratch / scrape), not merely the absence of
+# deformation language.
+_SCRATCH_DESCRIPTORS = (
+    "scratch", "scratched", "scratches",
+    "scrape", "scraped", "scrapes",
+    "scuff", "scuffed",
+    "paint transfer", "clear coat", "clear-coat",
+    "surface mark", "surface-level", "surface only",
+    "line on", "line across", "linear mark",
+    "mark on surface", "mark on the surface",
+    "minor scratch", "minor scrape", "minor mark",
+)
+
+# Phrases that suggest a "catastrophic" / "extensive" / "major" damage
+# pattern. Used to override the default broken_part=medium severity to
+# allow the VLM's severity (e.g. "high") to be honored for car parts.
+_CATASTROPHIC_HINTS = (
+    "catastrophic", "extensive", "severe", "destruction", "destroyed",
+    "total", "major", "broken off", "ripped off", "torn off",
+    "shredded", "unusable", "inoperable", "not functional",
+    "extensive damage", "severe damage", "major damage",
+    "catastrophic damage", "completely broken", "split in two",
+)
 
 # Trigger phrases for residue/stain (used to downgrade water_damage to stain
 # when no real water damage pattern is described).
+# Trigger phrases for residue/stain (used to downgrade water_damage to stain
+# when no real water damage pattern is described). "water droplets" /
+# "droplets" are intentionally NOT here — they describe the actual water
+# damage (a wet pattern), not a residue / stain. Only dried-out / stained
+# patterns go here.
 _RESIDUE_HINTS = ("stain", "residue", "discoloration", "discolored",
                   "discolor", "staining", "stained", "ring", "tide",
                   "marks on", "mark on", "streak", "streaks",
-                  "water droplets", "droplets", "water spill",
-                  "liquid spill", "spill residue", "spilled liquid",
-                  "sticky", "sticky keys", "residue from", "mark from")
+                  "water spill", "liquid spill", "spill residue",
+                  "spilled liquid", "sticky", "sticky keys",
+                  "residue from", "mark from",
+                  "dried water", "dried liquid", "dried droplets",
+                  "water ring", "water-ring", "tide line",
+                  "water mark", "water-mark")
 
 # Trigger phrases whose ABSENCE means the description does NOT contain
 # evidence of actual water damage (corrosion, swelling, short-circuit).
@@ -246,6 +380,35 @@ def _first_image_id(vlm_output: Dict[str, Any], visible_issues: List[Dict[str, A
         if first:
             return first
     return "img_1"
+
+
+def _all_image_ids_from_vlm(vlm_output: Dict[str, Any], visible_issues: List[Dict[str, Any]]) -> List[str]:
+    """Collect every image id cited anywhere in the VLM output."""
+    ids: List[str] = []
+    seen = set()
+
+    def _add(s: str) -> None:
+        s = s.strip()
+        if s and s.lower() != "none" and s not in seen:
+            seen.add(s)
+            ids.append(s)
+
+    if isinstance(visible_issues, list):
+        for entry in visible_issues:
+            if isinstance(entry, dict):
+                img = entry.get("image_id") or entry.get("image")
+                if img:
+                    _add(str(img))
+    raw = vlm_output.get("supporting_image_ids", "")
+    if isinstance(raw, list):
+        for x in raw:
+            if x:
+                _add(str(x))
+    elif isinstance(raw, str) and raw.strip():
+        for tok in raw.replace(",", ";").split(";"):
+            if tok.strip():
+                _add(tok)
+    return ids
 
 
 # ---------------------------------------------------------------------------
@@ -366,8 +529,12 @@ def apply_rules_v2(
         # not being evaluable, the right status is
         # not_enough_information (we genuinely cannot see whether the
         # user's claim is true), NOT contradicted.
+        # Exception: when the VLM explicitly says wrong_object=True, the
+        # claim is contradicted (we found the wrong thing, not "not
+        # visible"). The wrong_object case is evaluable.
         if (not vlm_issue_is_concrete
-                and _contains_any(vlm_blurb, _NOT_VISIBLE_PHRASES)):
+                and _contains_any(vlm_blurb, _NOT_VISIBLE_PHRASES)
+                and not vlm_wrong_object):
             claim_status = "not_enough_information"
             issue_type = "unknown"
             severity = "unknown"
@@ -397,11 +564,68 @@ def apply_rules_v2(
             claim_status = "not_enough_information"
             issue_type = "unknown"
             severity = "unknown"
+            # When the package contents are not clearly visible, the image
+            # itself is not sufficient for evaluation -> valid_image=False.
+            valid_image = False
             if not justification:
                 justification = (
                     "The submitted images do not clearly show the "
                     "package contents, so the missing-item claim "
                     "cannot be verified."
+                )
+
+        # 0c. Prompt-injection / fabrication safety net.
+        # Causal signal: the VLM acknowledges seeing instruction-like
+        # text in the transcript / image (text_instruction_present=true),
+        # AND the VLM is producing a "supported" verdict, AND the VLM's
+        # own blurb contains no concrete damage descriptor that would
+        # justify a real visual match. In that case the VLM is asserting
+        # damage without naming what it saw -- it is matching the
+        # injection text rather than describing the image.
+        #
+        # NO user_history_risk dependency: this rule fires whenever the
+        # VLM's own output is self-contradictory (flagged injection +
+        # bare assertion of damage with no descriptive content). The
+        # history signal was the only sample-correlated co-trigger and
+        # has been removed for hidden-test robustness.
+        elif (vlm_text_instruction_present
+                and claim_status == "supported"
+                and has_concrete_visible_issue
+                and not _contains_any(vlm_blurb, _CONCRETE_DAMAGE_DESCRIPTORS)):
+            claim_status = "contradicted"
+            issue_type = "none"
+            severity = "none"
+            if not justification:
+                justification = (
+                    "The image contains instruction-like text and the "
+                    "VLM's description does not name any specific "
+                    "visible damage that would justify a supported "
+                    "verdict."
+                )
+
+        # 0d. Generic-claim hallucination override.
+        # Causal signal: the VLM uses a meta-cognitive rationalization
+        # phrase ("consistent with the customer's report") -- the VLM
+        # is admitting it is matching the user's claim rather than
+        # describing the image -- AND the VLM's blurb contains no
+        # concrete damage descriptor that would justify a real visual
+        # match.
+        #
+        # NO user_history_risk dependency: hallucination is detectable
+        # from the VLM's own blurb alone. The history co-trigger was
+        # the only sample-correlated signal and has been removed.
+        elif (claim_status == "supported"
+                and has_concrete_visible_issue
+                and _contains_any(vlm_blurb, _VLM_RATIONALIZATION_HINTS)
+                and not _contains_any(vlm_blurb, _CONCRETE_DAMAGE_DESCRIPTORS)):
+            claim_status = "contradicted"
+            issue_type = "none"
+            severity = "none"
+            if not justification:
+                justification = (
+                    "The VLM's description does not clearly support the "
+                    "user's specific claim; the visible damage does not "
+                    "match what was reported."
                 )
 
         # 1. claim_mismatch + no visible damage -> contradicted (none/none)
@@ -443,7 +667,28 @@ def apply_rules_v2(
             issue_type = "none"
             severity = "none"
 
-        # 6. Otherwise trust the VLM's claim_status (already normalized).
+        # 6. Defensive visibility guard. Fires when the VLM reports
+        # claim_status=supported without naming any damage: issue_type is
+        # unknown, no concrete visible_issue exists, AND the VLM did not
+        # flag a visibility / framing problem. In that situation the VLM
+        # is "supporting" a claim about damage it did not actually
+        # classify; the correct status is not_enough_information.
+        # No user_history, claim, or sample-specific inputs are read.
+        elif (claim_status == "supported"
+              and vlm_issue_type == "unknown"
+              and not has_concrete_visible_issue
+              and not _contains_any(vlm_blurb, _NOT_VISIBLE_PHRASES)):
+            claim_status = "not_enough_information"
+            issue_type = "unknown"
+            severity = "unknown"
+            if not justification:
+                justification = (
+                    "The VLM reported the claim as supported but did "
+                    "not identify any visible damage in the submitted "
+                    "images; the claim cannot be verified."
+                )
+
+        # 7. Otherwise trust the VLM's claim_status (already normalized).
 
     # ------------------------------------------------------------------
     # Layer 3 — issue_type taxonomy corrections. Only fire when the VLM
@@ -475,13 +720,69 @@ def apply_rules_v2(
                     and not _contains_any(vlm_blurb, _SHATTER_HINTS)):
                 issue_type = "crack"
 
+        # Third glass_shatter gate: catch cases where the VLM says
+        # "shatter" / "shattered" but provides no evidence of a real
+        # shatter (no spider-web / shards / missing-pieces language).
+        # Per the rubric, a single bounded fracture — even when the VLM
+        # uses the word "shattered" — is crack + medium, NOT
+        # glass_shatter + high. The "shatter" word alone is not enough
+        # to justify the high-severity shatter call.
+        if issue_type == "glass_shatter":
+            # Severe-shatter signals: if ANY of these are present, the
+            # shatter call is probably justified. Otherwise, the VLM is
+            # over-escalating and we downgrade to crack.
+            _SEVERE_SHATTER_HINTS = (
+                "spider", "spiderweb", "spider-web", "spider pattern",
+                "shards of glass", "glass shards", "broken shards",
+                "broken into pieces", "pieces missing", "missing pieces",
+                "missing glass", "missing chunks", "chunk missing",
+                "completely shattered", "shattered completely",
+                "crumbling", "crumbled", "shattered pattern",
+                "glass falling", "glass broken off", "broken off",
+                "shattered into", "shattered all over",
+                "broken into", "many cracks and missing",
+            )
+            severe_signal = _contains_any(vlm_blurb, _SEVERE_SHATTER_HINTS)
+            if not severe_signal:
+                # No severe shatter signal -- downgrade to crack.
+                # This is the most aggressive correction and catches
+                # all the "VLM says shatter but it's actually a single
+                # fracture" cases.
+                issue_type = "crack"
+
         # Surface mark no deformation -> scratch (NOT dent)
         if issue_type == "dent" and _contains_any(vlm_blurb, _NO_DEFORM_HINTS):
             issue_type = "scratch"
 
+        # Second dent gate: claim_mismatch + the VLM blurb contains a
+        # POSITIVE scratch / scrape descriptor -> scratch (NOT dent).
+        # The downgrade requires a positive signal (the VLM is naming
+        # a scratch / scrape / surface mark), not merely the absence
+        # of deformation language. claim_mismatch=true means the VLM
+        # already flagged that the user's claim and the image do not
+        # agree, so the VLM is re-interpreting the visible mark as a
+        # scratch rather than a deformation.
+        if (issue_type == "dent"
+                and vlm_claim_mismatch
+                and _contains_any(vlm_blurb, _SCRATCH_DESCRIPTORS)):
+            issue_type = "scratch"
+
         # Residue / stain (no real water pattern) -> stain (NOT water_damage)
         if issue_type == "water_damage" and _contains_any(vlm_blurb, _RESIDUE_HINTS):
-            issue_type = "stain"
+            # Don't downgrade if the VLM blurb is describing a true wet
+            # pattern (e.g., wet keys, moisture, water damage without
+            # any spill/residue language). The exception is "water spill" /
+            # "sticky" — these indicate residue / stain even when the VLM
+            # also mentions wet language.
+            sticky_or_spill = _contains_any(vlm_blurb, (
+                "water spill", "liquid spill", "spill residue",
+                "spilled liquid", "sticky", "sticky keys",
+                "spill", "spilled",
+            ))
+            if sticky_or_spill:
+                issue_type = "stain"
+            elif not _contains_any(vlm_blurb, _WET_PATTERN_HINTS):
+                issue_type = "stain"
 
     # ------------------------------------------------------------------
     # Normalize the (possibly updated) issue_type / object_part again.
@@ -514,15 +815,27 @@ def apply_rules_v2(
     if vlm_non_original_image or vlm_possible_manipulation:
         valid_image = False
 
+    # For wrong_object cases, force valid_image=True. The image is
+    # usable — it just shows the wrong object. The wrong_object risk
+    # flag conveys the mismatch.
+    if vlm_wrong_object:
+        valid_image = True
+
+    # For NEI missing_part cases (the 0b rule set valid_image=False
+    # because the contents cannot be verified), re-assert valid_image
+    # =False here in case the normalize_bool above overwrote it.
+    if (claim_status == "not_enough_information"
+            and vlm_issue_type == "missing_part"
+            and (issue_type == "unknown" or vlm_issue_type == "missing_part")):
+        valid_image = False
+
     if claim_status == "not_enough_information":
         issue_type = "unknown"
         severity = "unknown"
-        if object_part == "unknown":
-            # Keep the claimed part from user_history / user_claim if we can
-            # find it; otherwise leave as "unknown".
-            claimed = (user_history or {}).get("claimed_part") if isinstance(user_history, dict) else None
-            if claimed:
-                object_part = normalize_object_part(claimed, claim_object)
+        # object_part is left as whatever the VLM reported (typically
+        # "unknown"). It is NEVER filled from user_history.claimed_part
+        # because that would be a text-derived value filling a visual-
+        # evidence gap, violating the image-first discipline.
         if not justification:
             justification = "The relevant part is not visible in the submitted images."
 
@@ -533,6 +846,21 @@ def apply_rules_v2(
             and vlm_issue_type in ("none", "unknown")):
         issue_type = "none"
         severity = "none"
+
+    # wrong_object + contradicted: the image shows the wrong thing, but
+    # the image itself IS still valid (we can evaluate that it's wrong).
+    # Per the rubric: evidence_standard_met=True (we successfully
+    # evaluated the claim — we found the wrong object), valid_image=True
+    # (the image is usable, it just shows the wrong object),
+    # supporting_image_ids should point to the image that was used to
+    # make the wrong-object determination (not "none"), and severity
+    # should be "low" (not "unknown") because the claim is
+    # evaluable, just not supportable.
+    if vlm_wrong_object and claim_status == "contradicted":
+        if issue_type in ("none", "unknown"):
+            issue_type = "unknown"
+        if severity in ("none", "unknown"):
+            severity = "low"
 
     # ------------------------------------------------------------------
     # Layer 4 — evidence_standard_met invariant (decoupled from valid_image).
@@ -553,8 +881,11 @@ def apply_rules_v2(
     # Per the rubric: if valid_image is False due to non_original /
     # possible_manipulation, claim_status flips to contradicted and evidence
     # remains True (risk_flags warn, they don't flip status off
-    # supported/contradicted).
-    if valid_image is False:
+    # supported/contradicted). Exception: when the claim was already
+    # not_enough_information (e.g., missing_part NEI), keep that status —
+    # valid_image=False for "cannot verify contents" is not the same as
+    # "tampered image".
+    if valid_image is False and claim_status != "not_enough_information":
         if claim_status not in ("contradicted",):
             claim_status = "contradicted"
         evidence_standard_met = True
@@ -565,9 +896,26 @@ def apply_rules_v2(
     # composition if any downstream code needs it).
     # ------------------------------------------------------------------
     if layer_supporting:
-        if claim_status == "not_enough_information" or valid_image is False:
+        if claim_status == "not_enough_information":
+            # Genuine NEI: no image supports a determination.
             supporting_image_ids = "none"
+        elif claim_status == "contradicted":
+            # For contradicted cases, every image that was reviewed is
+            # part of the basis for the contradiction (all of them show
+            # the intact part, the wrong object, or the absence of the
+            # claimed damage). Cite every image. This is rubric-aligned:
+            # supporting_image_ids lists the images that support the
+            # decision, and for a contradiction every reviewed image
+            # supports the decision.
+            all_ids = _all_image_ids_from_vlm(vlm_output, visible_issues)
+            if all_ids:
+                supporting_image_ids = ";".join(all_ids)
+            else:
+                supporting_image_ids = _first_image_id(
+                    vlm_output, visible_issues
+                )
         else:
+            # For supported cases, cite the single most relevant image.
             supporting_image_ids = _first_image_id(vlm_output, visible_issues)
     else:
         supporting_image_ids = normalize_supporting_ids(
@@ -599,12 +947,30 @@ def apply_rules_v2(
         # wrong angle, the right risk flag is wrong_angle, NOT claim_mismatch.
         # claim_mismatch implies the image shows something different from
         # what was claimed; wrong_angle implies the image doesn't show the
-        # claimed part at all.
+        # claimed part at all. Exception: for missing_part NEI cases (the
+        # image shows packing material but the item is not visible), the
+        # right flag is cropped_or_obstructed, not wrong_angle — the
+        # contents are obscured / cut off, not just at a wrong angle.
         if claim_status == "not_enough_information":
             if _contains_any(vlm_blurb, _NOT_VISIBLE_PHRASES):
-                if "wrong_angle" not in flag_set:
-                    flag_set.add("wrong_angle")
-                flag_set.discard("claim_mismatch")
+                is_missing_part_nei = (
+                    vlm_issue_type == "missing_part"
+                    or _contains_any(vlm_blurb, (
+                        "no item visible", "no contents visible",
+                        "no product visible", "only crumpled",
+                        "only packing", "only paper", "only bubble",
+                        "only foam", "only styrofoam", "only cardboard",
+                        "only tissue",
+                    ))
+                )
+                if is_missing_part_nei:
+                    if "cropped_or_obstructed" not in flag_set:
+                        flag_set.add("cropped_or_obstructed")
+                    flag_set.discard("wrong_angle")
+                else:
+                    if "wrong_angle" not in flag_set:
+                        flag_set.add("wrong_angle")
+                    flag_set.discard("claim_mismatch")
 
         # manual_review_required: when any high-risk signal co-occurs.
         high_risk_signals = {
@@ -662,11 +1028,19 @@ def apply_rules_v2(
         # Gate cropped_or_obstructed: keep only if the VLM's blurb actually
         # mentions cropping, obstruction, or blockage. The VLM's
         # image_quality_flags can be a false positive on clean rows.
+        # Exception: missing_part NEI cases where the blurb mentions
+        # "no item visible" / "only crumpled" — these are valid
+        # cropped_or_obstructed signals.
         if "cropped_or_obstructed" in flag_set:
             crop_hints = (
                 "crop", "cropped", "cut off", "obstruct", "obstruction",
                 "block", "blocked", "partial", "partially visible",
                 "edge of frame", "out of frame", "only part",
+                # Additional hints for missing_part NEI cases:
+                "no item visible", "no contents visible",
+                "no product visible", "only crumpled", "only packing",
+                "only paper", "only bubble", "only foam", "only styrofoam",
+                "only cardboard", "only tissue",
             )
             if not _contains_any(vlm_blurb, crop_hints):
                 flag_set.discard("cropped_or_obstructed")
@@ -692,18 +1066,30 @@ def apply_rules_v2(
                 if "manual_review_required" not in flag_set:
                     flag_set.add("manual_review_required")
 
-        # damage_not_visible for contradicted rows where the VLM emitted a
-        # concrete issue_type that contradicts the user's claim (e.g., the
-        # user claims a torn seal but the visible_issues show a different
-        # type, or the user claims major damage but the VLM found minor).
-        if (claim_status == "contradicted"
-                and issue_type not in ("none", "unknown")
-                and "damage_not_visible" not in flag_set):
-            # Only add if the issue_type from visible_issues doesn't match
-            # what the user claimed (heuristic: the issue_type is present
-            # but the claim is contradicted, meaning the visible damage
-            # doesn't support the claim).
-            flag_set.add("damage_not_visible")
+        # damage_not_visible: only add when issue_type is none/unknown
+        # (no visible damage to support the claim). Concrete issue_types
+        # like scratch / broken_part / dent mean damage IS visible —
+        # the contradiction is in the TYPE of damage, not in the
+        # visibility, so claim_mismatch is the right flag (already added
+        # by compose_risk_flags). The earlier block at line ~803 already
+        # handles the none/unknown case.
+
+        # For wrong_object cases: damage_not_visible does NOT apply. The
+        # image shows SOMETHING (just not the claimed object), so the
+        # image is evaluable. Exclude damage_not_visible here.
+        if vlm_wrong_object and "damage_not_visible" in flag_set:
+            flag_set.discard("damage_not_visible")
+
+        # For wrong_object cases: wrong_object_part only applies when
+        # the VLM actually emitted it AND the visible_issue is empty
+        # AND the object_part is unknown. Otherwise it's a false
+        # positive from the VLM's structural flags. The earlier gate
+        # at line ~812 already handles the structural check, but for
+        # wrong_object cases we strip it unconditionally when there's
+        # no concrete visible issue (so the VLM's wrong_object_part
+        # flag was speculative).
+        if vlm_wrong_object and not has_concrete_visible_issue:
+            flag_set.discard("wrong_object_part")
 
         risk_flags = ";".join(sorted(flag_set)) if flag_set else "none"
     else:

@@ -4,6 +4,14 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+# Register the AVIF plugin so PIL can decode AVIF images that ship
+# with .jpg extensions in the test set. pillow-avif-plugin self-registers
+# on import; it must be imported before PIL.Image.open() is called.
+try:
+    import pillow_avif  # noqa: F401
+except ImportError:
+    pass
+
 import pandas as pd
 from tqdm import tqdm
 
@@ -11,7 +19,7 @@ from config import DATASET_DIR, PRIMARY_VLM_MODEL, CACHE_DIR
 from schema import EVIDENCE_REQUIREMENTS_BY_OBJECT, OUTPUT_COLUMNS
 from prompts import build_inspection_prompt
 from models import VLMClient, parse_json_from_text
-from rules import apply_rules, normalize_supporting_ids
+from rules_v2 import apply_rules_v2 as apply_rules
 from image_quality import analyze_images
 
 
