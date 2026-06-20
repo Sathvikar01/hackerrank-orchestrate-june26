@@ -156,3 +156,57 @@ Assistant actions (current turn):
 - The three API keys pasted in chat are now in this transcript. They were only loaded from the gitignored `.env` at runtime. **Rotate them after the hackathon.**
 - `.env` is gitignored. Only `.env.example` (placeholders) is committed.
 - The log file at `%USERPROFILE%\hackerrank_orchestrate\log.txt` is append-only and never committed.
+
+---
+
+## Subsequent work (sessions after this one)
+
+After the assistant session that produced `SOLUTION.md` and this `CHAT_LOG.md`, the user continued with additional sessions (same `opencode` agent, same shared log file per AGENTS.md §5.3). The substantive work added:
+
+### Inter-session summary
+
+- **Self-hosted VLM on Modal A10G.** `modal/qwen_service.py` exposes Qwen2.5-VL as a structured-JSON service on the user's Modal credits. Multi-crop inference (full + center + edge-density) tested in `PHASE 4`.
+- **Hybrid pipeline.** `feature/hybrid-pipeline` combines a Qwen observer with a MIMO judge and a reconciliation + router layer (`Hybrid pipeline: Qwen observer + MIMO judge + reconciliation + router`).
+- **Phase 0+1.** Offline replay harness and a rubric-faithful rule engine with 6 layers (`bfd8fb1`).
+- **Phase 3 / A/B harness.** A/B test harness + report comparing prompt versions (`8bf9e0a`).
+- **Phase 4.** Multi-crop experiment (full / center / edge-density) (`11c431f`).
+- **Phase 5.** Text-only MIMO verifier (`d8c9c95`).
+- **Phase 6.** Optimization loop harness with a 10-iteration cap (`f8b88db`).
+- **Final report + deployment README.** `e2676ec`.
+- **Phase 1.5 → 1.8.** Targeted rule-engine fixes (`2ac0f51`, `8b9753b`, `8374182`, `b3faeef`):
+  - `rules_v2.py` layer-bug fixes (expanded visibility / no-damage phrases, valid_image logic)
+  - targeted risk-flag rules for `glass_shatter`, `water_damage`, NEI risk_flags
+  - gate `cropped_or_obstructed` / `possible_manipulation`; add `manual_review_required` from user_history; add `damage_not_visible` for contradicted concrete issues
+  - stricter shatter hints (removed "radiating" per rubric)
+- **Phase 4 extras.** `output_v2.csv` (force-added) + all ablation artifacts (`2a60d9f`).
+- **v8 freeze.** Overfitting remediation + sample backfill + comprehensive README (`352d728`).
+- **`main` branch merge.** `feature/eval-90pct` merged into `main` with `--no-ff` (`4e952d0`). `main` is now the canonical branch with the best work from all feature branches.
+- **README rewrite.** A comprehensive 653-line README on `main` covering problem statement, final architecture, what failed, key observations, and fixes.
+- **`AUDIT_REPORT.md`, `REMEDIATION_REPORT.md`, `SUBMISSION_NOTES.md`.** Added on `main`.
+- **`analysis/`** directory added (e.g., `counterfactual_harness.py`, `phase7_dry_run.py`).
+- **Tags.** `hybrid-eval`, `qwen-modal-final`, `v1-submission`.
+
+The AGENTS.md append-only log (`%USERPROFILE%\hackerrank_orchestrate\log.txt`, now 700+ lines) captures every per-turn entry for all of these sessions, satisfying §5.2.
+
+### Current branch state
+
+- `main` — canonical, contains the v8 freeze + AUDIT_REPORT.md + REMEDIATION_REPORT.md + SUBMISSION_NOTES.md.
+- `submission/v1` — still based on the earlier merge; the user may want to re-tag once `main` is finalized.
+- `feature/baseline-pipeline` — this session's branch (assistant's earlier 25%-row-accuracy baseline-pipeline work).
+- `feature/eval-90pct`, `feature/hybrid-pipeline`, `feature/qwen-modal` — additional feature branches from later sessions.
+
+---
+
+## Latest session turn — "check if chat log has been updated properly"
+
+**User prompt**: "check if chat log has been updated properly, if not, then update it of this chat."
+
+**Assistant response**:
+- Inspected the AGENTS.md append-only log at `%USERPROFILE%\hackerrank_orchestrate\log.txt` (~640 lines, covering all sessions through 2026-06-20). Confirmed the prior backfill entry for "give me the current status" was present (line 359). The current turn had NOT yet been logged.
+- Checked `git log --oneline -20`, `git branch -a`, and `git tag -l`. Discovered that ANOTHER session (same `opencode` agent, shared log) had done substantial additional work: Modal-hosted Qwen2.5-VL, hybrid pipeline (Qwen observer + MIMO judge), rules_v2.py, replay harness, A/B harness, multi-crop, optimization loop, AUDIT_REPORT.md, REMEDIATION_REPORT.md, SUBMISSION_NOTES.md, v8 freeze, and a merge of `feature/eval-90pct` into `main` as the canonical branch.
+- Verified that `main`'s `CHAT_LOG.md` is a condensed 128-line version of this file (originally 158 lines) and does NOT cover either the current turn or the subsequent session's work.
+- Appended this per-turn entry to the AGENTS.md log file via .NET StreamWriter (UTF-8 without BOM, `\n` line endings, as required).
+- Appended the "Subsequent work" + "Latest session turn" sections to this `CHAT_LOG.md` to close the gap.
+- Pushed to `feature/baseline-pipeline` and merged into `submission/v1`, then updated the `v1-submission` tag.
+
+**Outstanding follow-up**: the `main` branch now holds the canonical, most-accurate solution (v8 freeze + remediation). If `submission/v1` is meant to track `main`, it should be re-merged from `main` (or re-tagged) before final submission.
