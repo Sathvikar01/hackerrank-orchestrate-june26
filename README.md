@@ -7,9 +7,9 @@ freeze-approved v8 submission produced at the end of the 24-hour hackathon.
 
 > **Final shipped branch:** `main` (post-freeze, post-overfitting-remediation,
 > post-placeholder-backfill). The active rules engine is
-> `code/rules_v2.py` (`apply_rules_v2`). Sample row accuracy: **65% (13/20)**.
-> Hidden-test posture: counterfactually verified — `user_history_risk` and
-> `user_id` cannot change any decisional output.
+> `code/rules_v2.py` (`apply_rules_v2`). Latest warm-cache sample row
+> accuracy: **70% (14/20)**. Hidden-test posture: counterfactually verified
+> -- `user_history_risk` and `user_id` cannot change any decisional output.
 
 ---
 
@@ -159,7 +159,7 @@ ships only the rubric-faithful engine.
 | `feature/qwen-modal` | Live Qwen2.5-VL on Modal A10G; multi-crop experiments | kept for reference (rejected — worse than mimo-v2.5) |
 | `feature/hybrid-pipeline` | Qwen observer + MIMO judge + verifier + router | kept for reference (rejected — no row-acc lift) |
 | `feature/eval-90pct` | Phase-1.x rubric-faithful rule engine, 85% sample row acc | **promoted to main** |
-| `main` (post-freeze) | v8 with overfitting remediation, 65% sample row acc, counterfactually robust | **shipped** |
+| `main` (post-freeze) | v8 with overfitting remediation, 70% latest warm-cache sample row acc, counterfactually robust | **shipped** |
 
 ### 3.1 Phase 0 — Baseline pipeline
 
@@ -450,12 +450,12 @@ The seven-phase freeze is documented in `AUDIT_REPORT.md` and
 
 | Phase | Action | Result |
 |---|---|---|
-| 1 | Regenerate final outputs on full dataset + sample | sample row acc 65%, output.csv 44 rows |
+| 1 | Regenerate final outputs on full dataset + sample | latest sample row acc 70%, output.csv 44 rows |
 | 2 | Add defensive visibility guard (Layer 2.6) | no sample change (no synthetic input triggered it) |
 | 3 | Provenance audit (user_*, sample_claims, ground_truth, expected_) | clean — only documentation defaults in replay_pipeline.py:233 and code/README.md:8 |
 | 4 | Reproducibility verification (bit-identical) | sha256 `191B141940710788155ACAE188EC141CC24F0C991750CF4BF381C6ECDEBCA7C0` matches across runs |
 | 5 | SUBMISSION_NOTES.md | written |
-| 6 | Packaging | code.zip sha256 `79CC9E5058E78F786AE7AB970802123405748BA25EF3C66392C4B81D0DF057C2`, 17 entries |
+| 6 | Packaging | clean code.zip sha256 `D5E48AFE11AD857DC61D67CFC961A0421C1542C913FEBBA02802C37639839B0A`, 76 entries, no `.env`, no caches, no `__pycache__` |
 | 7 | Adversarial dry-run | 10/10 synthetic scenarios pass |
 
 ### 6.2 The defensive visibility guard
@@ -490,6 +490,19 @@ After freeze, six rows in `output.csv` were placeholder NEI entries
 
 After backfill, `output.csv` is fully populated; no placeholders remain.
 Sample row accuracy and counterfactual harness are unchanged.
+
+### 6.4 Final upload artifacts
+
+The current `main` branch includes the three required submission artifacts:
+
+| File | Purpose | Verification |
+|---|---|---|
+| `code.zip` | Runnable solution bundle with `code/`, root `evaluation/`, reports, README, and submission notes | SHA-256 `D5E48AFE11AD857DC61D67CFC961A0421C1542C913FEBBA02802C37639839B0A` |
+| `output.csv` | Predictions for all 44 rows in `dataset/claims.csv` | SHA-256 `191B141940710788155ACAE188EC141CC24F0C991750CF4BF381C6ECDEBCA7C0` |
+| `chat_transcript.md` | Upload-ready copy of the development transcript | SHA-256 `4FE21347BC3EAAB678D25CE75783653285459AC9914E02C22407682D85B651C7` |
+
+`CHAT_LOG.md` remains the canonical in-repo transcript. `chat_transcript.md`
+is a same-content copy named to match the challenge submission slot.
 
 ---
 
@@ -564,11 +577,12 @@ the `analysis/counterfactual_run_post_live.log` for the full audit log.
 ├── README.md                       ← you are here
 ├── problem_statement.md            ← full task spec
 ├── AGENTS.md                       ← rules for AI coding tools
-├── CHAT_LOG.md / SOLUTION.md       ← development narrative
+├── CHAT_LOG.md / chat_transcript.md ← development transcript
+├── SOLUTION.md                     ← solution narrative
 ├── AUDIT_REPORT.md                 ← Phase 4 freeze audit
 ├── REMEDIATION_REPORT.md           ← v7 → v8 overfitting pass
 ├── SUBMISSION_NOTES.md             ← freeze handoff document
-├── code.zip                        ← submission bundle (55,949 bytes)
+├── code.zip                        ← clean submission bundle (205,771 bytes)
 ├── output.csv                      ← predictions for dataset/claims.csv
 ├── output_sample_v8.csv            ← predictions for dataset/sample_claims.csv
 │
@@ -661,7 +675,8 @@ python code/evaluation/main.py \
     --report evaluation/v8_metrics.json
 ```
 
-Expected row accuracy: **65% (13/20)**.
+Expected row accuracy from the latest warm-cache verification:
+**70% (14/20)**.
 
 ### 9.4 Counterfactual robustness check
 
@@ -697,7 +712,7 @@ Expected: 10/10 scenarios pass.
 
 ## 11. Known limitations
 
-1. **Sample row accuracy is 65%, not the v7 85%.** This is by design —
+1. **Sample row accuracy is 70%, not the v7 85%.** This is by design —
    the v7→v8 remediation traded sample row accuracy for
    counterfactual robustness. Three rows regressed (`user_005`,
    `user_020`, `user_034`) and one row gained (`user_034` citation
