@@ -29,6 +29,7 @@ from config import DATASET_DIR, CACHE_DIR  # noqa: E402
 from prompts import build_inspection_prompt  # noqa: E402
 from rules_v2 import apply_rules_v2  # noqa: E402
 from image_quality import analyze_images  # noqa: E402
+from claim_parser import extract_claim_signals  # noqa: E402
 
 
 def image_hash(path: Path) -> str:
@@ -47,8 +48,7 @@ def _client_for_model(model: str) -> str:
 
 def cache_key_for(model: str, prompt: str, image_paths, prompt_version: str) -> str:
     parts = [prompt_version, model, prompt]
-    for p in sorted(image_paths):
-        parts.append(image_hash(Path(p)))
+    parts.extend(sorted(image_hash(Path(p)) for p in image_paths))
     return hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()[:32]
 
 
@@ -208,6 +208,7 @@ def run_replay(
                 "non_original_image": False,
                 "visible_issues": [],
             }
+        vlm_output.update(extract_claim_signals(user_claim, claim_object))
 
         try:
             det = analyze_images(abs_paths)

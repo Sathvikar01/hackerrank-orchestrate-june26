@@ -3,6 +3,7 @@
 Produces a deterministic set of quality flags that map onto the project risk_flags.
 """
 
+import logging
 from pathlib import Path
 from typing import Dict, List
 
@@ -19,13 +20,17 @@ DARK_THRESHOLD = 20.0
 OBSTRUCTION_BLACK_FRACTION = 0.35
 
 
+logger = logging.getLogger(__name__)
+
+
 def _to_bgr(path: Path, max_dim: int = 768) -> np.ndarray:
-    img = Image.open(path).convert("RGB")
-    w, h = img.size
-    if max(w, h) > max_dim:
-        scale = max_dim / max(w, h)
-        img = img.resize((int(w * scale), int(h * scale)), Image.LANCZOS)
-    arr = np.array(img)
+    with Image.open(path) as img:
+        img = img.convert("RGB")
+        w, h = img.size
+        if max(w, h) > max_dim:
+            scale = max_dim / max(w, h)
+            img = img.resize((int(w * scale), int(h * scale)), Image.LANCZOS)
+        arr = np.array(img)
     return cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
 
 
@@ -77,6 +82,7 @@ def analyze_images(paths: List[Path]) -> Dict[str, bool]:
             result = analyze_image(p)
             for k, v in result.items():
                 flags[k] = flags[k] or v
-        except Exception:
-            continue
+        except Exception as exc:
+            logger.warning("OpenCV quality analysis failed for %s: %s", p, exc)
+            flags["cropped_or_obstructed"] = True
     return flags

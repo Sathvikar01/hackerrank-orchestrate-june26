@@ -8,7 +8,6 @@
         "user_id": "user_002",
         "tag": "history_risk_on",
         "added": [
-          "manual_review_required",
           "user_history_risk"
         ],
         "removed": []
@@ -27,6 +26,7 @@
         "tag": "history_risk_off",
         "added": [],
         "removed": [
+          "manual_review_required",
           "user_history_risk"
         ]
       },
@@ -121,7 +121,6 @@
         "user_id": "user_002",
         "surrogate_uid": "user_024",
         "added": [
-          "manual_review_required",
           "user_history_risk"
         ],
         "removed": []
@@ -131,6 +130,7 @@
         "surrogate_uid": "user_022",
         "added": [],
         "removed": [
+          "manual_review_required",
           "user_history_risk"
         ]
       },
@@ -224,6 +224,8 @@
     ],
     "risk_flag_illegitimate_changes": []
   },
+  "vlm_output_source": "current_cache",
   "cache_misses": [],
+  "saved_raw_misses": [],
   "overall_pass": true
 }

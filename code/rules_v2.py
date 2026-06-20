@@ -5,20 +5,15 @@ This module exposes :func:`apply_rules_v2`, a deterministic, layer-by-layer
 post-processor that replaces the loose ``code.rules.apply_rules`` engine.
 
 It is designed to be importable without any external API keys and without
-triggering ``code.config`` (which reads ``.env`` at import time). To make the
-``code.*`` package safe to import under a no-key sandbox, dummy API key values
-are inserted into ``os.environ`` before any ``code.*`` import.
+triggering ``code.config`` (which reads ``.env`` at import time).
 """
 
 from __future__ import annotations
 
+import re
 import os
 import sys
 from typing import Any, Dict, List, Optional, Set
-
-# --- Env-var guard: prevent code.config from raising on import. -------------
-os.environ.setdefault("NVIDIA_API_KEY", "dummy")
-os.environ.setdefault("MIMO_API_KEY", "dummy")
 
 # --- Make the ``code/`` directory importable without requiring an __init__.py
 # file in the repo (the existing code/ layout is not a package). This lets
@@ -89,11 +84,10 @@ def _layer1_severity(issue_type: str, object_part: str, vlm_severity: str,
     # trivial cases. Trust the VLM severity in those situations.
     if issue_type in ("broken_part", "missing_part") and vlm_severity in (
             "high", "medium"):
+        if issue_type == "missing_part" and vlm_severity == "medium":
+            return "medium"
         if vlm_blurb and _contains_any(vlm_blurb, _CATASTROPHIC_HINTS):
             return vlm_severity
-        if vlm_severity == "high" and vlm_blurb and _contains_any(
-                vlm_blurb, _CATASTROPHIC_HINTS):
-            return "high"
     if issue_type in _BASE_SEVERITY_MAP:
         return _BASE_SEVERITY_MAP[issue_type]
     # Fall back to the VLM's severity (already normalized elsewhere).
@@ -148,7 +142,15 @@ def _text_lower(*candidates: Any) -> str:
 def _contains_any(haystack: str, needles) -> bool:
     if not haystack:
         return False
-    return any(n in haystack for n in needles)
+    for needle in needles:
+        if not needle:
+            continue
+        if re.fullmatch(r"[\w_]+", needle):
+            if re.search(rf"(?<!\w){re.escape(needle)}(?!\w)", haystack):
+                return True
+        elif needle in haystack:
+            return True
+    return False
 
 
 def _visible_issues_concrete(visible_issues: List[Dict[str, Any]]) -> bool:
@@ -498,6 +500,7 @@ def apply_rules_v2(
     object_part = vlm_object_part
     severity = vlm_severity
     claim_status = vlm_claim_status
+    valid_image = normalize_bool(vlm_output.get("valid_image", True))
     justification = str(vlm_output.get("claim_status_justification", "") or "").strip()
     reason = str(vlm_output.get("evidence_standard_met_reason", "") or "").strip()
 
@@ -508,6 +511,13 @@ def apply_rules_v2(
     vlm_possible_manipulation = normalize_bool(vlm_output.get("possible_manipulation"))
     vlm_non_original_image = normalize_bool(vlm_output.get("non_original_image"))
     vlm_text_instruction_present = normalize_bool(vlm_output.get("text_instruction_present"))
+    claimed_issue_type = normalize_enum(
+        vlm_output.get("_claimed_issue_type", "unknown"), ISSUE_TYPES, "unknown"
+    )
+    claimed_object_part = normalize_object_part(
+        vlm_output.get("_claimed_object_part", "unknown"), claim_object
+    )
+    claimed_functional_issue = normalize_bool(vlm_output.get("_claimed_functional_issue"))
 
     has_concrete_visible_issue = _visible_issues_concrete(visible_issues)
 
@@ -538,7 +548,6 @@ def apply_rules_v2(
             claim_status = "not_enough_information"
             issue_type = "unknown"
             severity = "unknown"
-            valid_image = normalize_bool(vlm_output.get("valid_image", True))
             if vlm_non_original_image or vlm_possible_manipulation:
                 valid_image = False
             if not justification:
@@ -690,6 +699,34 @@ def apply_rules_v2(
 
         # 7. Otherwise trust the VLM's claim_status (already normalized).
 
+        # 8. Defensive claim-shape correction. Car claims about dents,
+        # scratches, cracks, or broken parts are sometimes over-read by VLMs
+        # as missing_part even though the claimed car part is visible. Use the
+        # transcript-derived issue only for this impossible taxonomy mismatch.
+        if (claim_object == "car"
+                and issue_type == "missing_part"
+                and claimed_issue_type in {"dent", "scratch", "crack", "broken_part"}
+                and claimed_object_part != "unknown"):
+            issue_type = claimed_issue_type
+            object_part = claimed_object_part
+
+        # Functional laptop failures cannot be proven by a still image unless
+        # the visible issue itself is a broken part. A cosmetic dent near the
+        # claimed control does not prove that the control stopped working.
+        if (claim_object == "laptop"
+                and claimed_functional_issue
+                and claim_status == "supported"
+                and issue_type in {"dent", "scratch", "stain"}):
+            claim_status = "contradicted"
+            issue_type = "none"
+            severity = "none"
+            if claimed_object_part != "unknown":
+                object_part = claimed_object_part
+            justification = (
+                "The image does not show visual evidence proving the claimed "
+                "functional failure."
+            )
+
     # ------------------------------------------------------------------
     # Layer 3 — issue_type taxonomy corrections. Only fire when the VLM
     # actually emitted one of the trigger issue_types.
@@ -811,7 +848,6 @@ def apply_rules_v2(
     # does NOT make the image unreadable — the image still shows something
     # — so we keep valid_image=True and let the wrong_object risk flag
     # convey the structural mismatch.
-    valid_image = normalize_bool(vlm_output.get("valid_image", True))
     if vlm_non_original_image or vlm_possible_manipulation:
         valid_image = False
 
@@ -853,14 +889,13 @@ def apply_rules_v2(
     # evaluated the claim — we found the wrong object), valid_image=True
     # (the image is usable, it just shows the wrong object),
     # supporting_image_ids should point to the image that was used to
-    # make the wrong-object determination (not "none"), and severity
-    # should be "low" (not "unknown") because the claim is
-    # evaluable, just not supportable.
+    # make the wrong-object determination (not "none"). Damage severity
+    # remains unknown because this is not a visible damage grade on the
+    # claimed object.
     if vlm_wrong_object and claim_status == "contradicted":
-        if issue_type in ("none", "unknown"):
-            issue_type = "unknown"
-        if severity in ("none", "unknown"):
-            severity = "low"
+        issue_type = "unknown"
+        object_part = "unknown"
+        severity = "unknown"
 
     # ------------------------------------------------------------------
     # Layer 4 — evidence_standard_met invariant (decoupled from valid_image).

@@ -78,10 +78,13 @@ The user submitted {image_count} image(s). Examine all of them together. Each im
 CORE RULES
 1. Images are the PRIMARY source of truth. The transcript describes what to look for; the images decide whether it is there.
 2. User history adds risk context but does NOT override visual evidence. Do not change a supported/contradicted status just because history is risky.
-3. If the claim mentions multiple parts, select the SINGLE most severe visible issue as the primary issue_type and object_part. Mention other issues in the justification.
+3. First extract the claimed issue and claimed part from the conversation, then inspect whether that issue is visible on that part. Do not let an unrelated visible issue replace the user's claimed part.
 4. A claim is "contradicted" if the images clearly show the claimed damage is absent OR the wrong object/part is shown. A claim is "not_enough_information" if the relevant part cannot be seen at all (wrong angle, cropped out). A claim is "supported" only if the claimed damage is visible and matches the claimed part.
-5. valid_image is true unless the images are unusable (completely black, wrong object, screenshot/manipulation, not a real photo of the claimed object). evidence_standard_met is true if the image set is sufficient to evaluate the claim.
-6. Be conservative with severity. If a dent looks moderate, choose "medium", not "high". If you are unsure of the issue type, choose "unknown".
+5. If the claimed part is visible and intact, use issue_type="none", claim_status="contradicted", and cite the image IDs that show the absence of the claimed damage.
+6. If the image shows a different part than the one claimed, set claim_mismatch=true and wrong_object_part=true. The top-level object_part should remain the claimed/relevant part when it is known.
+7. Functional claims such as "stopped working" need visible physical evidence of failure. A still image cannot prove functionality by itself; if no claimed visual damage is present, mark the claim contradicted or not_enough_information according to visibility.
+8. valid_image is false only for unusable/non-original/manipulated image sets. A wrong object is still usable evidence for contradiction unless the image itself is not a real usable photo.
+9. Be conservative with severity. If a dent looks moderate, choose "medium", not "high". If you are unsure of the issue type, choose "unknown".
 
 {severity_rubric}
 

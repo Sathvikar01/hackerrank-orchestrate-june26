@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -21,6 +22,10 @@ from prompts import build_inspection_prompt
 from models import VLMClient, parse_json_from_text
 from rules_v2 import apply_rules_v2 as apply_rules
 from image_quality import analyze_images
+from claim_parser import extract_claim_signals
+
+
+logger = logging.getLogger(__name__)
 
 
 def load_user_history(path: Path) -> Dict[str, Dict[str, Any]]:
@@ -61,10 +66,11 @@ def filter_readable(paths: List[Path]) -> List[Path]:
     readable = []
     for p in paths:
         try:
-            Image.open(p).verify()
+            with Image.open(p) as img:
+                img.verify()
             readable.append(p)
-        except (UnidentifiedImageError, OSError, ValueError):
-            continue
+        except (UnidentifiedImageError, OSError, ValueError) as exc:
+            logger.warning("Dropping unreadable image %s: %s", p, exc)
     return readable
 
 
@@ -193,6 +199,8 @@ def process_claim(
         }
         metadata["parse_error"] = True
 
+    vlm_output.update(extract_claim_signals(user_claim, claim_object))
+
     deterministic_quality = analyze_images(abs_image_paths)
     deterministic_quality_flags = [k for k, v in deterministic_quality.items() if v]
     metadata["deterministic_quality_flags"] = deterministic_quality_flags
@@ -230,7 +238,7 @@ def run_pipeline(
     user_history_csv: Path = DATASET_DIR / "user_history.csv",
     evidence_requirements_csv: Path = DATASET_DIR / "evidence_requirements.csv",
     model: Optional[str] = None,
-    prompt_version: str = "v2",
+    prompt_version: str = "v1",
 ) -> Dict[str, Any]:
     input_csv = Path(input_csv).resolve()
     output_csv = Path(output_csv).resolve()

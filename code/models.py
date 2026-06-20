@@ -5,8 +5,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import requests
-from openai import OpenAI, APIError, RateLimitError
+from openai import OpenAI, APIConnectionError, APIError, APITimeoutError, BadRequestError, RateLimitError
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from PIL import Image
 
@@ -32,14 +31,15 @@ def image_hash(path: Path) -> str:
 
 def encode_image_to_base64(path: Path, max_dim: int = 1024, quality: int = 85) -> Tuple[str, str]:
     """Encode image to base64 JPEG. Resize if largest dimension > max_dim."""
-    img = Image.open(path).convert("RGB")
-    w, h = img.size
-    if max(w, h) > max_dim:
-        scale = max_dim / max(w, h)
-        img = img.resize((int(w * scale), int(h * scale)), Image.LANCZOS)
-    import io
-    buffer = io.BytesIO()
-    img.save(buffer, format="JPEG", quality=quality)
+    with Image.open(path) as img:
+        img = img.convert("RGB")
+        w, h = img.size
+        if max(w, h) > max_dim:
+            scale = max_dim / max(w, h)
+            img = img.resize((int(w * scale), int(h * scale)), Image.LANCZOS)
+        import io
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG", quality=quality)
     b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return b64, "image/jpeg"
 
@@ -58,8 +58,7 @@ class VLMClient:
 
     def _cache_key(self, model: str, prompt: str, image_paths: List[Path], prompt_version: str = "v1") -> str:
         parts = [prompt_version, model, prompt]
-        for p in sorted(image_paths):
-            parts.append(image_hash(p))
+        parts.extend(sorted(image_hash(p) for p in image_paths))
         digest = hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()[:32]
         return digest
 
@@ -69,18 +68,26 @@ class VLMClient:
     @retry(
         stop=stop_after_attempt(MAX_RETRIES),
         wait=wait_exponential(multiplier=1, min=2, max=30),
-        retry=retry_if_exception_type((APIError, RateLimitError, requests.RequestException)),
+        retry=retry_if_exception_type((APIError, APIConnectionError, APITimeoutError, RateLimitError)),
         reraise=True,
     )
     def _call_api(self, model: str, messages: List[Dict[str, Any]]) -> Dict[str, Any]:
         client = self._client_for_model(model)
-        response = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=TEMPERATURE,
-            max_tokens=8192,
-            timeout=REQUEST_TIMEOUT,
-        )
+        kwargs = {
+            "model": model,
+            "messages": messages,
+            "temperature": TEMPERATURE,
+            "max_tokens": 8192,
+            "timeout": REQUEST_TIMEOUT,
+            "response_format": {"type": "json_object"},
+        }
+        try:
+            response = client.chat.completions.create(**kwargs)
+        except BadRequestError as exc:
+            if "response_format" not in str(exc).lower():
+                raise
+            kwargs.pop("response_format", None)
+            response = client.chat.completions.create(**kwargs)
         content = response.choices[0].message.content or ""
         return {
             "content": content,

@@ -12,7 +12,9 @@ claim_status / issue_type / severity / object_part.
 This harness verifies that contract empirically:
 
   * Test A — for every sample row, replay the pipeline using the cached
-    VLM output for that row. Build three variants of user_history for
+    VLM output for that row. If current prompt/cache keys have changed,
+    fall back to the saved raw VLM outputs in `evaluation/v6_report.json`.
+    Build three variants of user_history for
     the SAME VLM output:
         A0. original user_history (baseline)
         A1. user_history_risk flipped ON for every row (history-noise)
@@ -22,9 +24,8 @@ This harness verifies that contract empirically:
     (additive / subtractive). claim_status, issue_type, severity,
     object_part, valid_image, supporting_image_ids must be invariant.
 
-The VLM output is held FIXED across A0..A3. We use the same cache-key
-construction as `code/replay_pipeline.py` (the only thing in this
-repo that has been confirmed to hit the existing mimo-v2.5 cache).
+The VLM output is held FIXED across A0..A3. Claim-parser signals are
+recomputed from the same claim text that the live pipeline uses.
 
 Run:
     python analysis/counterfactual_harness.py
@@ -32,7 +33,6 @@ Run:
 
 from __future__ import annotations
 
-import csv
 import json
 import os
 import random
@@ -47,6 +47,7 @@ DATASET_DIR = ROOT / "dataset"
 SAMPLE_CSV = DATASET_DIR / "sample_claims.csv"
 USER_HISTORY_CSV = DATASET_DIR / "user_history.csv"
 EVIDENCE_CSV = DATASET_DIR / "evidence_requirements.csv"
+SAVED_RAW_REPORT = ROOT / "evaluation" / "v6_report.json"
 
 for p in (str(CODE_DIR),):
     if p not in sys.path:
@@ -59,7 +60,7 @@ os.environ.setdefault("MIMO_API_KEY", "dummy")
 import pandas as pd  # noqa: E402
 import replay_pipeline  # noqa: E402
 from config import DATASET_DIR as CFG_DATASET_DIR, PRIMARY_VLM_MODEL  # noqa: E402
-from schema import EVIDENCE_REQUIREMENTS_BY_OBJECT  # noqa: E402
+from claim_parser import extract_claim_signals  # noqa: E402
 from rules_v2 import apply_rules_v2  # noqa: E402
 
 
@@ -71,6 +72,7 @@ DECISIONAL_FIELDS = [
     "severity",
     "object_part",
     "valid_image",
+    "supporting_image_ids",
 ]
 
 
@@ -110,9 +112,11 @@ def _flip_history_risk_off(uh: Dict[str, str]) -> Dict[str, str]:
 
 
 def _run_row(row: Dict[str, str], uh: Dict[str, str], vlm_output: Dict[str, Any]) -> Dict[str, Any]:
+    enriched = dict(vlm_output)
+    enriched.update(extract_claim_signals(row.get("user_claim", ""), row["claim_object"]))
     final = apply_rules_v2(
         claim_object=row["claim_object"],
-        vlm_output=vlm_output,
+        vlm_output=enriched,
         user_history=uh,
         deterministic_quality_flags=None,
     )
@@ -164,6 +168,20 @@ def _build_cached_vlm_map(
         reqs = list(evidence_requirements.get("all", []))
         reqs.extend(evidence_requirements.get(claim_object, []))
         abs_paths = replay_pipeline.image_paths_to_abs(row["image_paths"], CFG_DATASET_DIR)
+        readable_paths = []
+        try:
+            from PIL import Image, UnidentifiedImageError
+            for p in abs_paths:
+                try:
+                    with Image.open(p) as img:
+                        img.verify()
+                    readable_paths.append(p)
+                except (UnidentifiedImageError, OSError, ValueError):
+                    continue
+            if readable_paths:
+                abs_paths = readable_paths
+        except ImportError:
+            pass
         # Build prompt exactly as replay_pipeline does.
         from prompts import build_inspection_prompt
         prompt = build_inspection_prompt(
@@ -185,6 +203,34 @@ def _build_cached_vlm_map(
             continue
         cached_outputs[uid] = parsed
     return cached_outputs, misses
+
+
+def _load_saved_raw_vlm_map(rows: List[Dict[str, str]]) -> Tuple[Dict[str, Dict[str, Any]], List[str]]:
+    """Fallback source for robustness tests when prompt/cache keys changed.
+
+    The report metadata is indexed in the same order as sample_claims.csv and
+    contains raw VLM JSON strings from a prior live run. This does not validate
+    prompt-cache reproducibility, but it does validate that the deterministic
+    rules are not depending on user IDs or history for decisions.
+    """
+    if not SAVED_RAW_REPORT.exists():
+        return {}, [r["user_id"] for r in rows]
+    with open(SAVED_RAW_REPORT, "r", encoding="utf-8") as f:
+        report = json.load(f)
+    metadata = report.get("metadata", [])
+    outputs: Dict[str, Dict[str, Any]] = {}
+    misses: List[str] = []
+    for idx, row in enumerate(rows):
+        uid = row["user_id"]
+        raw = ""
+        if idx < len(metadata):
+            raw = str(metadata[idx].get("raw_content", "") or "")
+        parsed = replay_pipeline.parse_json_from_text(raw)
+        if parsed is None:
+            misses.append(uid)
+            continue
+        outputs[uid] = parsed
+    return outputs, misses
 
 
 def test_history_risk_randomised(
@@ -323,7 +369,16 @@ def main() -> int:
         rows, user_history, evidence_requirements,
         model=PRIMARY_VLM_MODEL, prompt_version="v1",
     )
-    print(f"Cached outputs ready: {len(cached_outputs)}/{len(rows)} (misses: {misses})")
+    source = "current_cache"
+    fallback_misses: List[str] = []
+    if len(cached_outputs) == 0:
+        print("No current cache hits; falling back to saved raw VLM outputs.")
+        cached_outputs, fallback_misses = _load_saved_raw_vlm_map(rows)
+        source = "saved_raw_report"
+    print(f"VLM outputs ready: {len(cached_outputs)}/{len(rows)} via {source}")
+    print(f"Current-cache misses: {misses}")
+    if fallback_misses:
+        print(f"Saved-raw misses: {fallback_misses}")
     print()
 
     print("-" * 78)
@@ -377,7 +432,9 @@ def main() -> int:
     out = {
         "test_a_history_risk_randomised": a,
         "test_b_user_id_shuffled": b,
+        "vlm_output_source": source,
         "cache_misses": misses,
+        "saved_raw_misses": fallback_misses,
         "overall_pass": overall_pass,
     }
     report_path = ROOT / "analysis" / "counterfactual_report.json"
